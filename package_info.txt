@@ -1,0 +1,33 @@
+SEND NOTIFICATION WITHOUT USING PUSHER -- 
+# composer require laravel/reverb
+# php artisan list | findstr reverb
+
+# php artisan reverb:install
+# automatic code add in .env file -- 
+BROADCAST_CONNECTION=reverb
+QUEUE_CONNECTION=database
+REVERB_APP_ID=890366
+REVERB_APP_KEY=3ifzbqd4s4t4posbzcek
+REVERB_APP_SECRET=mlbxqutptbtjunepuwl3
+REVERB_HOST="localhost"
+REVERB_PORT=8080
+REVERB_SCHEME=http
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+
+
+# php artisan reverb:start
+
+# php artisan notifications:table
+this table created -- notifications
+
+# php artisan make:notification CompanyNotification
+# php artisan make:request SendNotificationRequest -- for validation
+# php artisan make:event CompanyEvent -- event create 
+
+
+
+
+
