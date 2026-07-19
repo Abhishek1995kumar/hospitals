@@ -7,7 +7,6 @@
 - Tailwind CSS
 - MySQL8+
 - Blade
-- 
 
 ## Features
 - Authentication (Custom Create)
@@ -37,17 +36,27 @@ Password -- test
 ```
 
 
-## Default Categories
-- Salary
-- Rent
-- Food
-- Other
+## FEATURE
+- CUSTOMERS
+- HOSPITALS
+- DOCTORS
+- NURSES
+- PATIENTS
+- EMERGENCY
+- AMBULANCE
+- LABORATORY
+- PHARMACY
+- OPD SYSTEM
+- IPD SYSTEM
+- PAYROLL
+- BILLING SYSTEM
 
 
 
 ## Project Structure
 - app/
-- resources/js/
+- resources/js/ (for react js)
+- resources/view/ (for blade)
 - routes/
 - database/
 
