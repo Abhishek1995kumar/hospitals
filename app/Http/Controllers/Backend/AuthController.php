@@ -21,9 +21,11 @@ class AuthController extends Controller {
             $data = $request->all();
             $validation = $this->loginValidationTrait($data);
             if(!empty($validation)) {
-                return $validation;
+                return json_response(false, 410, "Validation failed", $validation);
             }
+            
             return $this->loginTrait($data);
+
         } catch (\Exception $e) {
             return json_response(false, 500, $e->getMessage());
         }

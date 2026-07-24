@@ -146,13 +146,20 @@ trait ValidationTrait {
                 }
             }
 
-            $email = User::where("email", $data["login"])->orWhere('phone', $data['login'])->orWhere("username", $data["login"])->first();
-
-            if (!$email) {
+            $loginInput = trim($data['login']);
+            $encryptedLogin = secure($loginInput, 'E');
+            $user = User::where(function ($query) use ($loginInput, $encryptedLogin) {
+                            $query->where('email', $encryptedLogin)
+                                ->orWhere('phone', $encryptedLogin)
+                                ->orWhere('email', $loginInput)
+                                ->orWhere('phone', $loginInput)
+                                ->orWhere('username', $loginInput); // Username generally encrypted nahi hota
+                        })->first();
+            if (!$user) {
                 $errors["login"][] = "Invalid user credential";
 
             }
-
+            
             if (!empty($errors)) {
                 return  $errors;
             }
@@ -961,6 +968,129 @@ trait ValidationTrait {
             }
         }
     // Customer Validation End
+
+
+
+
+    // Pharmacy Start
+        public function validationPartySupplierTrait($data) {
+            try {
+                $errors = [];
+                $email   = trim($data['email']);
+                $gst_no   = trim($data['gst_no']);
+                $exists  = DB::table('suppliers')->where('email', $email)
+                            ->where('gst_no', $gst_no)
+                            ->where('status', 1)
+                            ->exists();
+                if(!empty($exists)) {
+                    $errors['email'][] = 'This email is already exists, please enter anyother email.';
+                }
+                if(trim($data['party_type']) == 2 || trim($data['party_type']) == 3) {
+                    $drugLicence = trim($data['drug_license_no']) ?? NULL;
+                    if(!empty($drugLicence) && !drugLicence($drugLicenseInput)) {
+                        $errors['drug_license_no'][] = 'Invalid Drug License Number format.';
+                    }
+                }
+                
+                $rules = [
+                    // 'hospital_id'      => ['nullable', 'integer'],
+                    // 'firm_id'          => ['nullable', 'integer'],
+                    'company_name'     => ['required', 'string', 'min:3', 'max:100'],
+                    'name'             => ['required', 'string', 'min:5', 'max:100'],
+                    'contact'          => ['required', 'string', 'min:10', 'max:15'],
+                    'email'            => ['required', 'string', 'exists:customers,email', 'min:10', 'max:200', 'email'],
+                    'gst_no'           => ['string', 'min:14', 'max:18'],
+                    'pan_no'           => ['string', 'min:10', 'max:10'],
+                    'doctor_name'      => ['required', 'string', 'min:5', 'max:100'],
+                    'doctor_address'   => ['nullable', 'string'],
+                    'balance_type'     => ['nullable', 'integer'],
+                    'party_type'       => ['required', 'integer'],
+                ];
+
+                $messages = [
+                    'company_name.required' => 'The:customer name field is required.',
+                    'company_name.string' => 'The:customer name must be a string.',
+                    'company_name.max' => 'The:customer name may not be greater than 200 characters.',
+                    'company_name.min' => 'The:customer name may not be less than 5 characters.',
+                    'name.required' => 'The:name field is required.',
+                    'name.string' => 'The:name must be a string.',
+                    'name.max' => 'The:name may not be greater than 15 characters.',
+                    'name.min' => 'The:name may not be less than 10 characters.',
+                    'contact.required' => 'The:contact no field is required.',
+                    'contact.string' => 'The:contact no must be a string.',
+                    'contact.max' => 'The:contact no may not be greater than 15 characters.',
+                    'contact.min' => 'The:contact no may not be less than 10 characters.',
+                    'gst_no.string' => 'The:gst no must be a string.',
+                    'gst_no.max' => 'The:gst no may not be greater than 14 characters.',
+                    'gst_no.min' => 'The:gst no may not be less than 18 characters.',
+                    'pan_no.string' => 'The:pan no must be a string.',
+                    'pan_no.max' => 'The:pan no may not be greater than 10 characters.',
+                    'pan_no.min' => 'The:pan no may not be less than 10 characters.',
+                    'email.required' => 'The:email address field is required.',
+                    'email.exists' => 'The:email address already exists.',
+                    'email.string' => 'The:email address must be a string.',
+                    'email.max' => 'The:email address may not be greater than 200 characters.',
+                    'email.min' => 'The:email address may not be less than 10 characters.',
+                    'doctor_name.required' => 'The:doctor name field is required.',
+                    'doctor_name.string' => 'The:doctor name must be a string.',
+                    'doctor_name.max' => 'The:doctor name may not be greater than 100 characters.',
+                    'doctor_name.min' => 'The:doctor name may not be less than 5 characters.',
+                    'doctor_address.string' => 'The:doctor name must be a string.',
+                    'party_type.required' => 'The:party type field is required.',
+                    'party_type.integer' => 'The:party type field must be number.',
+                ];
+                
+                foreach ($rules as $field => $fieldRules) {
+                    $value = $data[$field] ?? null;
+                    foreach ($fieldRules as $rule) {
+                        if ($rule === 'required' && empty($value)) {
+                            $errors[$field][] = $messages["{$field}.required"];
+
+                        } 
+                        if($rule === 'string' && !is_string($value)) {
+                            $errors[$field][] = $messages["{$field}.string"];
+
+                        } 
+                        if ($rule === 'integer') {
+                            if (filter_var($value, FILTER_VALIDATE_INT) === false) {
+                                $errors[$field][] = $messages["{$field}.integer"];
+                            }
+                        } 
+                        if ($rule === 'exists' && !isset($value)) {
+                            $errors[$field][] = $messages["{$field}.exists"];
+
+                        } 
+                        if (Str::startsWith($rule, 'max:')) {
+                            $max = (int)Str::after($rule, 'max:');
+                            if (strlen($value) > $max) {
+                                $errors[$field][] = $messages["{$field}.max"];
+                            }
+
+                        } 
+                        if(Str::startsWith($rule, 'min:')) {
+                            $min = (int)Str::after($rule, 'min:');
+                            if(strlen($value) < $min) {
+                                $errors[$field][] = $messages["{$field}.min"];
+                            }
+                        }
+                    }
+                }
+                return $errors;
+
+            } catch(Throwable $th) {
+                Log::error(['message' => $th->getMessage()]);
+                // return json_response(false, 422, $th->getMessage());
+            }
+        }
+
+    // Pharmacy End
+
+
+
+
+
+
+
 
 
     public function holidayValidationTrait($data) {

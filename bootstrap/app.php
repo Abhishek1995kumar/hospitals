@@ -19,8 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         
         $middleware->alias([
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
-            // 'subscription' => \App\Http\Middleware\CheckSubscription::class,
-            // 'plan.limit' => \App\Http\Middleware\PlanValidationMiddleware::class,
+            'subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'plan.limit' => \App\Http\Middleware\PlanValidationMiddleware::class,
         ]);
     })
 

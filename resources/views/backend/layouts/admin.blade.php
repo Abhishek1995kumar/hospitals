@@ -54,6 +54,10 @@
         }
     </script>
     <div class="d-flex flex-column flex-root">
+        <?php 
+            $sessionData = session('user_auth_data');
+            
+        ?>
         <div class="page d-flex flex-row flex-column-fluid">
             <div id="kt_aside" class="aside" data-kt-drawer="true" data-kt-drawer-name="aside" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_aside_mobile_toggle">
                 <div class="aside-menu flex-column-fluid">
@@ -564,7 +568,37 @@
                                     </span>
                                     <div class="menu-sub menu-sub-accordion">
                                         <div class="menu-item">
-                                            <a class="menu-link " href="#">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/parties*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/parties') }}">
+                                                <span class="menu-bullet">
+                                                    <span class="bullet bullet-dot"></span>
+                                                </span>
+                                                <span class="menu-title">{{ __('Customer') }}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="menu-sub menu-sub-accordion">
+                                        <div class="menu-item">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/supplier*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/supplier') }}">
+                                                <span class="menu-bullet">
+                                                    <span class="bullet bullet-dot"></span>
+                                                </span>
+                                                <span class="menu-title">{{ __('Supplier') }}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="menu-sub menu-sub-accordion">
+                                        <div class="menu-item">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/vendor*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/vendor') }}">
+                                                <span class="menu-bullet">
+                                                    <span class="bullet bullet-dot"></span>
+                                                </span>
+                                                <span class="menu-title">{{ __('Vendor') }}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="menu-sub menu-sub-accordion">
+                                        <div class="menu-item">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/madicine*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/madicine') }}">
                                                 <span class="menu-bullet">
                                                     <span class="bullet bullet-dot"></span>
                                                 </span>
@@ -574,7 +608,7 @@
                                     </div>
                                     <div class="menu-sub menu-sub-accordion">
                                         <div class="menu-item">
-                                            <a class="menu-link " href="#">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/inventory*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/inventory') }}">
                                                 <span class="menu-bullet">
                                                     <span class="bullet bullet-dot"></span>
                                                 </span>
@@ -584,7 +618,7 @@
                                     </div>
                                     <div class="menu-sub menu-sub-accordion">
                                         <div class="menu-item">
-                                            <a class="menu-link " href="#">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/sales*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/sales') }}">
                                                 <span class="menu-bullet">
                                                     <span class="bullet bullet-dot"></span>
                                                 </span>
@@ -594,7 +628,7 @@
                                     </div>
                                     <div class="menu-sub menu-sub-accordion">
                                         <div class="menu-item">
-                                            <a class="menu-link " href="#">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/purchase*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/purchase') }}">
                                                 <span class="menu-bullet">
                                                     <span class="bullet bullet-dot"></span>
                                                 </span>
@@ -604,7 +638,17 @@
                                     </div>
                                     <div class="menu-sub menu-sub-accordion">
                                         <div class="menu-item">
-                                            <a class="menu-link " href="#">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/stock*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/stock') }}">
+                                                <span class="menu-bullet">
+                                                    <span class="bullet bullet-dot"></span>
+                                                </span>
+                                                <span class="menu-title">{{ __('Stocks Manage') }}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="menu-sub menu-sub-accordion">
+                                        <div class="menu-item">
+                                            <a class="menu-link {{Request::is('admin/pharmacy/report*') ? 'active' : ''}}" href="{{ url('admin/pharmacy/report') }}">
                                                 <span class="menu-bullet">
                                                     <span class="bullet bullet-dot"></span>
                                                 </span>
@@ -1043,10 +1087,10 @@
                                                             <img alt="Logo" src="" onerror="this.onerror=null;this.src='/assets/media/blank.png'" />
                                                         </div>
                                                         <div class="d-flex flex-column">
-                                                            <div class="fw-bold d-flex align-items-center fs-5"> {{ auth()->user()->fname . ' ' . auth()->user()->lname }} </div>
-                                                            <a href="#" class="fw-semibold text-muted text-hover-primary fs-7">{{ auth()->user()->email }}</a>
+                                                            <div class="fw-bold d-flex align-items-center fs-5"> {{ $sessionData->user_name ?? null }} </div>
+                                                            <a href="#" class="fw-semibold text-muted text-hover-primary fs-7"> {{ secure($sessionData->email, 'D') ?? null }} </a>
                                                             <div class="fw-bold d-flex align-items-center fs-5">
-                                                                <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2">Super Admin</span>
+                                                                <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2"> {{ $sessionData->role_names ?? null }} </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1214,6 +1258,12 @@
     <script>
         window.CustomerListUrl = "{{ url('admin/customer') }}";
         window.CustomerSubmitUrl = "{{ url('admin/customer/save') }}";
+        window.SupplierListUrl = "{{ url('admin/pharmacy/supplier') }}";
+        window.SupplierSubmitUrl = "{{ url('admin/pharmacy/supplier/save') }}";
+        window.PharmacyCustomerListUrl = "{{ url('admin/pharmacy/parties') }}";
+        window.PharmacyCustomerSubmitUrl = "{{ url('admin/pharmacy/parties/save') }}";
+        window.PharmacyVendorListUrl = "{{ url('admin/pharmacy/vendor') }}";
+        window.PharmacyVendorSubmitUrl = "{{ url('admin/pharmacy/vendor/save') }}";
     </script>
 
     @yield('scripts')

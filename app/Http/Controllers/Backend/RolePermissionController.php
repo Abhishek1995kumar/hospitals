@@ -46,18 +46,18 @@ class RolePermissionController extends Controller {
             $userCustomerId = $user->customer_id;  // Shart 4 & 5: Pata karein ki user System (Project Owner) ka hai ya Client (Customer) ka Hum user ke tables ke static customer_id par trust karenge taaki cross-access na ho
             // SCENARIO A: User System/Project Owner ki Company ka hai
             if (empty($userCustomerId)) {
-                $systemQuery = DB::table('roles')
-                    ->select('id', 'name', 'is_full_access')
-                    ->where('status', 1)
-                    ->where('is_system', 0)
-                    ->where('scope', 0);
-
-                // Agar login user 'super_admin' nahi hai (par system company ka employee hai), toh use baki system roles dikhao par 'super_admin' ka main role chhupa do
+                $status = 1;
+                $query ="SELECT r.id, r.name, r.is_full_access, CONCAT(u.fname, ' ', u.lname) user_name
+                                FROM roles r
+                                JOIN user_roles ur ON ur.role_id = r.id 
+                                JOIN users u ON u.id = ur.user_id
+                                WHERE r.status = ?";
+                $binding = [$status]; 
                 if(!in_array('super_admin', $roleCodes)) {
-                    $systemQuery->where('code', '!=', 'super_admin');
+                    $query .= " AND r.code != ?";
+                    $binding[] = 'super_admin';
                 }
-                $roles['system'] = $systemQuery->get();
-
+                $roles['system'] = DB::select($query, $binding);
                 $systemPerms = DB::table('permissions')
                                 ->leftJoin('modules', 'modules.id', '=', 'permissions.module_id')
                                 ->where('permissions.status', 1)
@@ -126,7 +126,7 @@ class RolePermissionController extends Controller {
     }
 
 
-    public function permissionManagement(Request $request) {
+    public function authenticationList(Request $request) {
         try {
             if (!$request->filled('type')) {
                 return json_response(false, 400, 'List type is required');
@@ -338,12 +338,11 @@ class RolePermissionController extends Controller {
     public function rolePermissionSave(Request $request) {
         try {
             $data = $request->all();
-            $customerId = auth()->user()->customer_id;
             $validation = $this->rolePermissionMappingValidationTrait($data);
             if($validation) {
                 return json_response(false, 410, "Validation failed", $validation);
             }
-
+            $customerId = DB::table('roles')->where('roles.id', $data['role_id'])->pluck('customer_id')->first();
             DB::transaction(function () use ($data, $customerId) {
                 foreach ($data['permission_id'] as $permission) {
                     RolePermission::create([

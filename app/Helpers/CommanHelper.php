@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\AuditLog;
 use App\Models\User;
+use App\Models\AuditLog;
 use Illuminate\Support\Str;
 use App\Models\Backend\Customer;
 use App\Models\Backend\Hospital;
@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
+
+if (!function_exists('authUser')) {
+    function authUser() {
+        return session('user_auth_data');
+    }
+}
+
 
 if(!function_exists('storeLog')) {
     function storeLog($action, $requestData = []) {
@@ -34,7 +41,6 @@ if(!function_exists('storeLog')) {
             $log->url           = request()->fullUrl();        // full url
             $log->method        = request()->method();         // GET/POST/PUT/DELETE
             $log->user_os       = getUserOS();                 // GET/POST/PUT/DELETE
-            // $log->user_agent    = getUserAgent();
             $log->request_data  = !empty($requestData) ? json_encode($requestData) : json_encode(request()->except(['password', 'password_confirmation', '_token'])); // data jo request me aaya hai
             $log->save();
             return true;
@@ -52,17 +58,6 @@ if(!function_exists('sendMail')) {
         Log::info('Sending Email', ['email' => $email, 'subject' => $subject, 'name'=> $data['name'] ?? 'N/A']);
         Mail::to($email)->send(new $mailableClass($data, $subject, $view));
         return true;
-
-        // for exaple -- sendMail(
-        //     $data['email'],
-        //     [
-        //         'name' => $data['customer_name'], 
-        //         'email' => $data['email'], // Yeh zaroori hai kyunki aap HTML me ise use kar rhe hain
-        //         'password' => "add"
-        //     ], 
-        //     'Registration Successful', 'backend.emails.customer_register', 
-        //     CustomerRegisterMail::class
-        // );
     }
 }
 
@@ -109,16 +104,35 @@ if(!function_exists('uploadImage')) {
 
 
 
-if(!function_exists('fullName')) {
-    function fullName($fname, $lname) {
-        return ucfirst($fname) . ' ' . ucfirst($lname);
+if (!function_exists('drugLicence')) {
+    function drugLicence($value) {
+        $pattern = '#^[A-Z]{2}[-/\s]?[A-Z0-9]{2,5}[-/\s]?(20|20B|20F|20G|21|21B)[-/\s]?[0-9]{4,8}$#i'; // yaha par delimiter # ye hai kyoki yaha par / back slash bahut baar use ho rha hai, jo code ko terminate kar dega iss liye # ye use kiya hai
+        if(trim(preg_match($pattern, ((string) $value), $matchs))) {
+            return strtoupper($matchs[0]);
+        }
+        return false;
     }
 }
 
 
-if(!function_exists('authDetails')) {
-    function authDetails() {
-        
+if (!function_exists('gstNumber')) {
+    function gstNumber($value) {
+        $pattern = '/^[0-9]{2}[aA-zZ]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[aA-zZ]{1}[0-9A-Z]{1}$/';
+        if(trim(preg_match($pattern, ((string) $value), $matchs))) {
+            return strtoupper($matchs[0]);
+        }
+        return false;
+    }
+}
+
+
+if (!function_exists('panNumber')) {
+    function panNumber($value) {
+        $pattern = '/^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/';
+        if(trim(preg_match($pattern, ((string) $value), $matchs))) {
+            return strtoupper($matchs[0]);
+        }
+        return false;
     }
 }
 
@@ -162,6 +176,15 @@ if (!function_exists('formatedName')) {
     }
 }
 
+
+if (!function_exists('formatedEmail')) {
+    function formatedEmail($value): string {
+        if (empty($value)) { return ''; }
+        $email = strtolower(trim((string) $value)); // Extra spaces remove karein aur lowercase me convert karein
+        $cleanEmail = filter_var($email, FILTER_SANITIZE_EMAIL); // Invalid characters ko sanitize/clean karein
+        return $cleanEmail ? : '';
+    }
+}
 
 
 if(!function_exists('generateOtp')) {

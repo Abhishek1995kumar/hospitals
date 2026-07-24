@@ -13,10 +13,11 @@ class PermissionMiddleware {
         if (!PermissionHelper::hasPermission($permission)) {
             // Agar request AJAX hai to JSON response do, nahi to 403 Page aborter chalao
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'status' => false, 
-                    'message' => 'Aapko is action ki permission nahi hai.'
-                ], 403);
+                 return json_response(false, 403, "Aapko is action ki permission nahi hai.");
+                // return response()->json([
+                //     'status' => false,
+                //     'message' => 'Aapko is action ki permission nahi hai.'
+                // ], 403);
             }
             abort(403, 'Unauthorized Access.');
         }
