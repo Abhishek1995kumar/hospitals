@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckSubscription {
@@ -13,24 +15,38 @@ class CheckSubscription {
             return redirect()->route('login');
         }
 
-        $customer = DB::table('customers')->where('id', $user->customer_id)->first();
+        if ($user->is_system == 0) { // 2. Super Admin ke liye saare checks BYPASS kar do
+            return $next($request);
+        }
+
+        $customer = DB::table('customers')->where('id', $user->customer_id)->first(); // Customer record fetch karo
         if (!$customer) {
-            abort(403, 'Customer not found.');
+            auth()->logout();
+            return redirect()->route('login')->with('error', 'Customer account not found.');
         }
 
-        // Customer Inactive
-        if ($customer->status == 0) {
+        if ($customer->status == 0) { // Customer Account Inactive Check
             auth()->logout();
-            return redirect()->route('login')->with('error', 'Customer account is inactive.');
+            return redirect()->route('login')->with('error', 'Your company account is inactive. Please contact support.');
         }
 
-        // Subscription Expired
-        if ($customer->subscription_status == 2 || (!empty($customer->subscription_end_date) && now()->gt($customer->subscription_end_date))) {
+        $isExpired = false; // Subscription Expiry Check
+        if ($customer->subscription_status == 2 || $customer->subscription_status == 3) {
+            $isExpired = true;
+
+        } elseif (!empty($customer->subscription_end_date)) { // Safe Carbon parsing
+            if (now()->gt(Carbon::parse($customer->subscription_end_date))) {
+                $isExpired = true;
+            }
+        }
+
+        if ($isExpired) {
             auth()->logout();
-            return redirect()->route('subscription.expired');
-            
+            return redirect()->route('subscription.expired')->with('error', 'Your subscription has expired.');
         }
 
         return $next($request);
     }
 }
+
+

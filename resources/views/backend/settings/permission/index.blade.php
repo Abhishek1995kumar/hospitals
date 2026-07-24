@@ -701,11 +701,11 @@
                                                         <label class="required fs-6 fw-semibold mb-2">{{ __('Role')}}</label>
                                                         <select name="role_id" class="form-select search" id="roleMappingId" data-control="select2" data-placeholder="Select role">
                                                             <option selected disabled> {{ __('Select Role')}} </option>
-                                                            @if(isset($roles['system']) && $roles['system']->isNotEmpty())
+                                                            @if(!empty($roles['system']))
                                                                 @foreach($roles['system'] as $role)
-                                                                    <option value="{{ $role->id }}"> {{ $role->name }} </option>
+                                                                    <option value="{{ $role->id }}"> {{ $role->name }} - {{ $role->user_name }} </option>
                                                                 @endforeach
-                                                            @elseif(isset($roles['customer']) && $roles['customer']->isNotEmpty())
+                                                            @elseif(!empty($roles['customer']))
                                                                 @foreach($roles['customer'] as $role)
                                                                     <option value="{{ $role->id }}"> {{ $role->name }} </option>
                                                                 @endforeach
@@ -797,19 +797,13 @@
                                                     <div class="form-group">
                                                         <label class="required fs-6 fw-semibold mb-2">{{ __('Role')}}</label>
                                                         <select name="role_id[]" class="form-select search" id="roleUserMappingId" multiple data-control="select2" data-placeholder="Select role">
-                                                            @if(isset($roles['system']) && $roles['system']->isNotEmpty())
+                                                            @if(!empty($roles['system']))
                                                                 @foreach($roles['system'] as $role)
-                                                                    @if($role->is_full_access == 0)
-                                                                    @else
-                                                                        <option value="{{ $role->id }}"> {{ $role->name }} </option>
-                                                                    @endif
+                                                                    <option value="{{ $role->id }}"> {{ $role->name }} - {{ $role->user_name }} </option>
                                                                 @endforeach
-                                                            @elseif(isset($roles['customer']) && $roles['customer']->isNotEmpty())
+                                                            @elseif(!empty($roles['customer']))
                                                                 @foreach($roles['customer'] as $role)
-                                                                    @if($role->is_full_access == 0)
-                                                                    @else
-                                                                        <option value="{{ $role->id }}"> {{ $role->name }} </option>
-                                                                    @endif
+                                                                    <option value="{{ $role->id }}"> {{ $role->name }} </option>
                                                                 @endforeach
                                                             @else 
                                                                 <option value="">{{ __('Data not available')}}</option>

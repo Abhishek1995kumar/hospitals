@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\backend\FirmController;
 use App\Http\Controllers\backend\AuthController;
+use App\Http\Controllers\backend\ExcelController;
 use App\Http\Controllers\backend\ClinicController;
+use App\Http\Controllers\backend\PharmacyController;
 use App\Http\Controllers\backend\CustomerController;
 use App\Http\Controllers\backend\HospitalController;
 use App\Http\Controllers\backend\DashboardController;
@@ -58,14 +60,15 @@ Route::group(['middleware' => 'guest'], function () {
 
 
 
-Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
+Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/notify', [NotificationController::class, 'send'])->name('notify');
+    Route::get('/export/{type?}', [ExcelController::class, 'export'])->name('admin.export');
 
     Route::group(['prefix' => 'authentication', 'middleware' => 'permission:authentication.view'], function () {
         Route::get('/', [RolePermissionController::class, 'index'])->name('authentication.index');
-        Route::get('list', [RolePermissionController::class, 'permissionManagement'])->name('authentication.list');
+        Route::get('list', [RolePermissionController::class, 'authenticationList'])->name('authentication.list');
         Route::post('save', [RolePermissionController::class, 'roleSave'])->name('authentication.save');
         Route::post('permission/save', [RolePermissionController::class, 'permissionSave'])->name('permission.save');
         Route::post('role-permission/save', [RolePermissionController::class, 'rolePermissionSave'])->name('authentication.permission.save');
@@ -120,6 +123,57 @@ Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
         Route::post('/cache', [MaintenanceController::class, 'cache'])->name('maintenance.cache');
         Route::post('/config', [MaintenanceController::class, 'config'])->name('maintenance.config');
         Route::post('/optimize', [MaintenanceController::class, 'optimizer'])->name('maintenance.optimize');
+    });
+
+
+    Route::group(['prefix' => 'subscription'], function () {
+        Route::get('/', [MaintenanceController::class, 'subscription'])->name('subscription.expired');
+    });
+
+
+    Route::group(['prefix' => 'pharmacy'], function () {
+        Route::group(['prefix' => 'parties'], function () {
+            Route::get('/', [PharmacyController::class, 'parties'])->name('pharmacy.parties');
+            Route::get('/create', [PharmacyController::class, 'partyCreate'])->name('pharmacy.parties.create');
+            Route::post('/save', [PharmacyController::class, 'partySave'])->name('pharmacy.parties.save');
+            
+        });
+
+        Route::group(['prefix' => 'supplier'], function () {
+            Route::get('/', [PharmacyController::class, 'supplier'])->name('pharmacy.supplier');
+            Route::get('/create', [PharmacyController::class, 'supplierCreate'])->name('pharmacy.supplier.create');
+            Route::post('/save', [PharmacyController::class, 'supplierSave'])->name('pharmacy.supplier.save');
+        });
+            
+        Route::group(['prefix' => 'vendor'], function () {
+            Route::get('/', [PharmacyController::class, 'vendor'])->name('pharmacy.vendor');
+            Route::get('/create', [PharmacyController::class, 'vendorCreate'])->name('pharmacy.vendor.create');
+            Route::post('/save', [PharmacyController::class, 'vendorSave'])->name('pharmacy.vendor.save');
+        });
+
+        Route::group(['prefix' => 'madicine'], function () {
+            Route::get('/', [PharmacyController::class, 'madicine'])->name('pharmacy.madicine');
+        });
+
+        Route::group(['prefix' => 'inventory'], function () {
+            Route::get('/', [PharmacyController::class, 'inventory'])->name('pharmacy.inventory');
+        });
+
+        Route::group(['prefix' => 'purchase'], function () {
+            Route::get('/', [PharmacyController::class, 'purchase'])->name('pharmacy.purchase');
+        });
+
+        Route::group(['prefix' => 'sales'], function () {
+            Route::get('/', [PharmacyController::class, 'sales'])->name('pharmacy.sales');
+        });
+
+        Route::group(['prefix' => 'stock'], function () {
+            Route::get('/', [PharmacyController::class, 'stock'])->name('pharmacy.stock');
+        });
+
+        Route::group(['prefix' => 'report'], function () {
+            Route::get('/', [PharmacyController::class, 'report'])->name('pharmacy.report');
+        });
     });
 });
 

@@ -17,6 +17,16 @@
 		.justify-content {
 			right !important;
 		}
+        
+        .swal2-container.swal2-center>.swal2-popup {
+            justify-self: end !important;
+        }
+
+        .swal2-popup {
+            width: 30em !important;
+            padding: 1rem !important;
+            margin-right: 4rem !important;
+        }
 	</style>
 </head>
 

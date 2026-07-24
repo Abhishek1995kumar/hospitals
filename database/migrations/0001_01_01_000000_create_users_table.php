@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('department_id');
             $table->string('user_id', 30)->unique();
             $table->integer('senior_user_id')->nullable();
+            $table->integer('is_system')->default(0)->comment('0=Super admin employee, 1=customer company employee');
             $table->string('fname');
             $table->string('lname')->nullable();
             $table->string('username')->unique();

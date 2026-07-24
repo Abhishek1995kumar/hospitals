@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('firm_id')->nullable()->commit('hospital/customer ki firm location'); // kis hospital/customer ki firm location hai
             $table->unsignedBigInteger('hospital_id')->nullable()->commit('hospital/customer ke hospital'); // kis hospital/customer ka service hai
+            $table->unsignedBigInteger('firm_id')->nullable()->commit('hospital/customer ki firm location'); // kis hospital/customer ki firm location hai
             $table->unsignedBigInteger('parent_id')->nullable()->commit('parent service id'); // category support (nullable)
             $table->string('name');
             $table->string('slug')->unique(); // pregnancy-care

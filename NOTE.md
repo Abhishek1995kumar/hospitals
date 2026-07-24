@@ -41,10 +41,27 @@
 - composer show | findstr spreadsheet
 - composer show | findstr maatwebsite
 - composer require maatwebsite/excel:^3.1 -W -- installation, ye latest version install karta hai
-- agar composer require maatwebsite/excel:^3.1 -W -- install nahi hua tab - composer config minimum-stability -
-     ye command chalana hoga, phir ye -- composer config repositories, uske baad ye -- composer diagnose
+
+- agar composer require maatwebsite/excel:^3.1 -W -- install nahi hua tab - composer config 
+        minimum-stability -
+        ye command chalana hoga, phir ye -- composer config repositories, uske baad ye -- composer diagnose
 
 - composer show maatwebsite/excel -- remove installed labrary
+
+- composer clear command -- composer clear-cache
+
+
+- maatwebsite install 
+    - composer require "maatwebsite/excel:^3.1" -W -- ye 3.1 se uppar ka version install karega
+    - agar error aaye tab 
+        - open php.ini
+            - ;extension=zip
+            - ;extension=gd
+            - ;extension=xml
+            - ;extension=mbstring
+            - ;extension=fileinfo
+            in sare extension ko search kar aur uncomment karo
+    - php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider" --tag=config
 
 
 
@@ -61,3 +78,8 @@
 
 
 
+
+
+## Queue Run --
+- php artisan queue:work
+- php artisan queue:restart 

@@ -7,6 +7,152 @@ $.ajaxSetup({
 
 // let addMoreRows=2;
 
+
+// Create Page Management Start
+    function loadPage(url, addHistory = true) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response){
+                $('#kt_content_container').html(response);
+                $('#loaderContainer').hide(); // Loader hide karein
+                if(addHistory){
+                    history.pushState({url: url}, '', url);
+                } 
+            },
+            error: function() {
+                $('#loaderContainer').hide();
+            }
+        });
+    }
+    // Global click listeners jo naye dynamically loaded buttons par bhi kaam karein
+    $(document).on('click', '#addCustomer', function(e){
+        e.preventDefault();
+        let url = $(this).data('url');
+        loadPage(url);
+        
+    });
+
+    // Global click listeners jye supplier ke liye hai
+    $(document).on('click', '#addPharmacyCustomer', function(e){
+        e.preventDefault();
+        let url = $(this).data('url');
+        loadPage(url);
+        
+    });
+    $(document).on('click', '#addSupplier', function(e){
+        e.preventDefault();
+        let url = $(this).data('url');
+        loadPage(url);
+        
+    });
+    $(document).on('click', '#addPharmacyVendor', function(e){
+        e.preventDefault();
+        let url = $(this).data('url');
+        loadPage(url);
+        
+    });
+    
+
+    window.onpopstate = function(){
+        loadPage(location.pathname, false);
+    };
+
+    $(document).off('click', '#backCustomerList').on('click', '#backCustomerList', function(e){
+        e.preventDefault();
+        loadPage(window.CustomerListUrl);
+    });
+
+
+    $(document).off('click', '#backSupplierList').on('click', '#backSupplierList', function(e){
+        e.preventDefault();
+        loadPage(window.SupplierListUrl);
+    });
+
+
+    $(document).off('click', '#backPharmacyCustomerList').on('click', '#backPharmacyCustomerList', function(e){
+        e.preventDefault();
+        loadPage(window.PharmacyCustomerListUrl);
+    });
+
+
+    $(document).off('click', '#backPharmacyVendorList').on('click', '#backPharmacyVendorList', function(e){
+        e.preventDefault();
+        loadPage(window.PharmacyVendorListUrl);
+    });
+// Create Page Management End
+
+
+
+// Field Validation Start
+    function validateEmail(email) {
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if(email.value.trim() != '' && !regex.test(email.value)) {
+            document.getElementById('emailError').style.display = "block"
+        } else {
+            document.getElementById('emailError').style.display = "none"
+        }
+    }
+
+    function validateGstNumber(gst) {
+        const regex = /^[0-9]{2}[aA-zZ]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[aA-zZ]{1}[0-9A-Z]{1}$/;
+        if(gst.value.trim() != '' && !regex.test(gst.value)) {
+            document.getElementById('gstError').style.display = "block"
+        } else {
+            document.getElementById('gstError').style.display = "none"
+        }
+    }
+
+    function validatePanNumber(pan) {
+        const regex = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/;
+        if(pan.value.trim() != '' && !regex.test(pan.value)) {
+            document.getElementById('panError').style.display = "block"
+        } else {
+            document.getElementById('panError').style.display = "none"
+        }
+    }
+
+    function validateDrugLicence(drug) {
+        const dlRegex = /^[A-Z]{2}[-/\s]?[A-Z0-9]{2,5}[-/\s]?(20|20B|20F|20G|21|21B)[-/\s]?[0-9]{4,8}$/i;
+        if(drug.value.trim() != '' && !dlRegex.test(drug.value)) {
+            document.getElementById('drugError').style.display = "block"
+        } else {
+            document.getElementById('drugError').style.display = "none"
+        }
+    }
+
+    function validationNumber(elem) {
+        elem.value = elem.value.replace(/\D/g, '');
+        if (elem.value.length !== 10) {
+            document.getElementById("mobileError").style.display = "block";
+        } else {
+            document.getElementById("mobileError").style.display = "none";
+        }
+    }
+
+    function validationAlternateNumber(elem) {
+        elem.value = elem.value.replace(/\D/g, '');
+        if (elem.value.length !== 10) {
+            document.getElementById("alternateMobileError").style.display = "block";
+        } else {
+            document.getElementById("alternateMobileError").style.display = "none";
+        }
+    }
+
+    function validationWebsite(elem) {
+        const urlPattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+(\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)?$/;
+        if (elem.value.trim() !== "" && !urlPattern.test(elem.value)) {
+            document.getElementById("websiteError").style.display = "block";
+        } else {
+            document.getElementById("websiteError").style.display = "none";
+        }
+    }
+// Field Validation End
+
+
 // List function start --
     function loadData(type, url) {
         $.ajax({
@@ -1018,43 +1164,6 @@ $.ajaxSetup({
 
 
 // Customer Creation Start
-    function loadPage(url, addHistory = true) {
-        $.ajax({
-            url: url,
-            type: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(response){
-                $('#kt_content_container').html(response);
-                $('#loaderContainer').hide(); // Loader hide karein
-                if(addHistory){
-                    history.pushState({url: url}, '', url);
-                } 
-            },
-            error: function() {
-                $('#loaderContainer').hide();
-            }
-        });
-    }
-
-    // Global click listeners jo naye dynamically loaded buttons par bhi kaam karein
-    $(document).on('click', '#addCustomer', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-
-    window.onpopstate = function(){
-        loadPage(location.pathname, false);
-    };
-
-    $(document).off('click', '#backCustomerList').on('click', '#backCustomerList', function(e){
-        e.preventDefault();
-        loadPage(window.CustomerListUrl);
-    });
-
     // Country change hone par states load karne ke liye
         $(document).on('change', '#country_name', function() {
             let countryId = $(this).val();
@@ -1117,33 +1226,6 @@ $.ajaxSetup({
             }
         });
     // Country change hone par states load karne ke liye
-
-    function validationNumber(elem) {
-        elem.value = elem.value.replace(/\D/g, '');
-        if (elem.value.length !== 10) {
-            document.getElementById("mobileError").style.display = "block";
-        } else {
-            document.getElementById("mobileError").style.display = "none";
-        }
-    }
-
-    function validationAlternateNumber(elem) {
-        elem.value = elem.value.replace(/\D/g, '');
-        if (elem.value.length !== 10) {
-            document.getElementById("alternateMobileError").style.display = "block";
-        } else {
-            document.getElementById("alternateMobileError").style.display = "none";
-        }
-    }
-
-    function validationWebsite(elem) {
-        const urlPattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+(\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)?$/;
-        if (elem.value.trim() !== "" && !urlPattern.test(elem.value)) {
-            document.getElementById("websiteError").style.display = "block";
-        } else {
-            document.getElementById("websiteError").style.display = "none";
-        }
-    }
 
 
     function saveCustomer(e) { 
@@ -1297,6 +1379,299 @@ $.ajaxSetup({
 // Document Js End --
 
 
+
+
+// Pharmacy Management JS Start here
+    function savePharmacyCustomer(e) { 
+        e.preventDefault(); 
+        $('.savePharmacyCustomerBtn').prop('disabled', true); 
+        // Regex Patterns
+        const intPattern = /^\d+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let data = { 
+            'hospital_id'       : $("#hospital_id").val().trim(), 
+            'firm_id'           : $("#firm_id").val().trim(), 
+            'company_name'      : $("#company_name").val().trim(), 
+            'name'              : $("#name").val().trim(), 
+            'email'             : $("#email").val().trim(), 
+            'contact'           : $("#contact").val().trim(), 
+            'gst_no'            : $("#gst_no").val().trim(), 
+            'pan_no'            : $("#pan_no").val().trim(), 
+            'doctor_name'       : $("#doctor_name").val().trim(), 
+            'doctor_address'    : $("#doctor_address").val().trim(), 
+            'balance_type'      : $("#balance_type").val().trim(), 
+            'party_type'        : $("#party_type").val().trim(), 
+            'opening_balance'   : $("#opening_balance").val().trim(),
+            'credit_limit'      : $("#credit_limit").val().trim(),
+        }; 
+
+        // Configuration rules
+        const validationRules = [
+            { key: 'company_name',    type: 'string',  label: 'company name' },
+            { key: 'name',            type: 'string',  label: 'name' },
+            { key: 'email',           type: 'email',   label: 'email' },
+            { key: 'contact',         type: 'integer', label: 'contact number', msg: 'Please enter a valid contact (numbers only).' },
+            { key: 'gst_no',          type: 'string',  label: 'gst no' },
+            { key: 'pan_no',          type: 'string',  label: 'pan no' },
+            { key: 'doctor_name',     type: 'string',  label: 'doctor name' },
+            { key: 'doctor_address',  type: 'string',  label: 'doctor address' },
+            { key: 'balance_type',    type: 'integer', label: 'balance type', msg: 'Please enter a valid balance type.' },
+            { key: 'party_type',      type: 'integer', label: 'party type',    msg: 'Please enter a valid party type.' },
+            { key: 'opening_balance', type: 'string',  label: 'opening balance' },
+            { key: 'credit_limit',    type: 'string',  label: 'credit limit' },
+        ];
+
+        for (let rule of validationRules) {
+            let value = data[rule.key];
+            if (value === '') {
+                validationAlert(`Missing ${rule.label}`, `Please enter ${rule.label}.`, 'error', 5000, 'OK');
+                $('.savePharmacyCustomerBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'integer' && !intPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyCustomerBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'email' && !emailPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyCustomerBtn').prop('disabled', false);
+                return false;
+            }
+        }
+        submitPharmacyCustomer(data);
+    }
+
+    function submitPharmacyCustomer(data) {
+        let url = window.PharmacyCustomerSubmitUrl; 
+        data._token = $('meta[name="csrf-token"]').attr('content'); // CSRF Token ko data object me add kar dein
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: data,
+            success: function(res) {
+                $('.savePharmacyCustomerBtn').prop('disabled', false);
+                if(res.code == 200) {
+                    validationAlert('Customer created', res.message, 'success', 2000, 'OK');
+                    loadPage(window.PharmacyCustomerListUrl);
+                }
+            },
+            error: function(xhr) {
+                $('.savePharmacyCustomerBtn').prop('disabled', false);
+                // 422 standard validation rules handling
+                if (xhr.status === 422 && xhr.responseJSON.errors) {
+                    let errors = xhr.responseJSON.errors;
+                    for(let key in errors) {
+                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
+                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                    }
+                } else {
+                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
+                    if(response) {
+                        for(let key in response) {
+                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+
+
+    function savePharmacySupplier(e) { 
+        e.preventDefault(); 
+        $('.savePharmacySupplierBtn').prop('disabled', true); 
+        // Regex Patterns
+        const intPattern = /^\d+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let data = { 
+            'hospital_id'       : $("#hospital_id").val().trim(), 
+            'firm_id'           : $("#firm_id").val().trim(), 
+            'company_name'      : $("#company_name").val().trim(), 
+            'name'              : $("#name").val().trim(), 
+            'email'             : $("#email").val().trim(), 
+            'contact'           : $("#contact").val().trim(), 
+            'gst_no'            : $("#gst_no").val().trim(), 
+            'pan_no'            : $("#pan_no").val().trim(), 
+            'doctor_name'       : $("#doctor_name").val().trim(), 
+            'doctor_address'    : $("#doctor_address").val().trim(), 
+            'balance_type'      : $("#balance_type").val().trim(), 
+            'party_type'        : $("#party_type").val().trim(), 
+            'opening_balance'   : $("#opening_balance").val().trim(), 
+            'credit_days'       : $("#credit_days").val().trim(),
+            'contact_person'    : $("#contact_person").val().trim(), 
+            'drug_license_no'   : $("#drug_license_no").val().trim(), 
+        }; 
+
+        // Configuration rules
+        const validationRules = [
+            { key: 'company_name',    type: 'string',  label: 'company name' },
+            { key: 'name',            type: 'string',  label: 'name' },
+            { key: 'email',           type: 'email',   label: 'email' },
+            { key: 'contact',         type: 'integer', label: 'contact number', msg: 'Please enter a valid contact (numbers only).' },
+            { key: 'gst_no',          type: 'string',  label: 'gst no' },
+            { key: 'pan_no',          type: 'string',  label: 'pan no' },
+            { key: 'doctor_name',     type: 'string',  label: 'doctor name' },
+            { key: 'doctor_address',  type: 'string',  label: 'doctor address' },
+            { key: 'balance_type',    type: 'integer', label: 'balance type', msg: 'Please enter a valid balance type.' },
+            { key: 'party_type',      type: 'integer', label: 'party type',    msg: 'Please enter a valid party type.' },
+            { key: 'opening_balance', type: 'string',  label: 'opening balance' },
+            { key: 'credit_days',     type: 'string',  label: 'credit days' },
+            { key: 'contact_person',  type: 'string',  label: 'contact person' },
+            { key: 'drug_license_no', type: 'string',  label: 'drug license no' },
+        ];
+
+        for (let rule of validationRules) {
+            let value = data[rule.key];
+            if (value === '') {
+                validationAlert(`Missing ${rule.label}`, `Please enter ${rule.label}.`, 'error', 5000, 'OK');
+                $('.savePharmacySupplierBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'integer' && !intPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacySupplierBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'email' && !emailPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacySupplierBtn').prop('disabled', false);
+                return false;
+            }
+        }
+        submitPharmacySupplier(data);
+    }
+
+    function submitPharmacySupplier(data) {
+        let url = window.SupplierSubmitUrl; 
+        data._token = $('meta[name="csrf-token"]').attr('content'); // CSRF Token ko data object me add kar dein
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: data,
+            success: function(res) {
+                $('.savePharmacySupplierBtn').prop('disabled', false);
+                if(res.code == 200) {
+                    validationAlert('Supplier created', res.message, 'success', 2000, 'OK');
+                    loadPage(window.SupplierListUrl);
+                }
+            },
+            error: function(xhr) {
+                $('.savePharmacySupplierBtn').prop('disabled', false);
+                if (xhr.status === 422 && xhr.responseJSON.errors) { // 422 standard validation rules handling
+                    let errors = xhr.responseJSON.errors;
+                    for(let key in errors) {
+                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
+                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                    }
+                } else {
+                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
+                    if(response) {
+                        for(let key in response) {
+                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+
+    function savePharmacyVendor(e) { 
+        e.preventDefault(); 
+        $('.savePharmacyVendorBtn').prop('disabled', true); 
+        // Regex Patterns
+        const intPattern = /^\d+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let data = { 
+            'hospital_id'       : $("#hospital_id").val().trim(), 
+            'firm_id'           : $("#firm_id").val().trim(), 
+            'company_name'      : $("#company_name").val().trim(), 
+            'name'              : $("#name").val().trim(), 
+            'email'             : $("#email").val().trim(), 
+            'contact'           : $("#contact").val().trim(), 
+            'gst_no'            : $("#gst_no").val().trim(), 
+            'pan_no'            : $("#pan_no").val().trim(), 
+            'doctor_name'       : $("#doctor_name").val().trim(), 
+            'doctor_address'    : $("#doctor_address").val().trim(),
+        }; 
+
+        // Configuration rules
+        const validationRules = [
+            { key: 'company_name',    type: 'string',  label: 'company name' },
+            { key: 'name',            type: 'string',  label: 'name' },
+            { key: 'email',           type: 'email',   label: 'email' },
+            { key: 'contact',         type: 'integer', label: 'contact number', msg: 'Please enter a valid contact (numbers only).' },
+            { key: 'gst_no',          type: 'string',  label: 'gst no' },
+            { key: 'pan_no',          type: 'string',  label: 'pan no' },
+            { key: 'doctor_name',     type: 'string',  label: 'doctor name' },
+            { key: 'doctor_address',  type: 'string',  label: 'doctor address' },
+        ];
+
+        for (let rule of validationRules) {
+            let value = data[rule.key];
+            if (value === '') {
+                validationAlert(`Missing ${rule.label}`, `Please enter ${rule.label}.`, 'error', 5000, 'OK');
+                $('.savePharmacyVendorBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'integer' && !intPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyVendorBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'email' && !emailPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyVendorBtn').prop('disabled', false);
+                return false;
+            }
+        }
+        submitPharmacyVendor(data);
+    }
+
+    function submitPharmacyVendor(data) {
+        let url = window.PharmacyVendorSubmitUrl; 
+        data._token = $('meta[name="csrf-token"]').attr('content'); // CSRF Token ko data object me add kar dein
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: data,
+            success: function(res) {
+                $('.savePharmacyVendorBtn').prop('disabled', false);
+                if(res.code == 200) {
+                    validationAlert('Vendor created', res.message, 'success', 2000, 'OK');
+                    loadPage(window.PharmacyVendorListUrl);
+                }
+            },
+            error: function(xhr) {
+                $('.savePharmacyVendorBtn').prop('disabled', false);
+                if (xhr.status === 422 && xhr.responseJSON.errors) { // 422 standard validation rules handling
+                    let errors = xhr.responseJSON.errors;
+                    for(let key in errors) {
+                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
+                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                    }
+                } else {
+                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
+                    if(response) {
+                        for(let key in response) {
+                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
+                        }
+                    }
+                }
+            }
+        });
+    }
+// Pharmacy Management JS end 
 
 
 
