@@ -60,7 +60,7 @@ class PharmacyController extends Controller {
 
                 // Safe Helper to handle Null & Trim together
                 $customer = [
-                    'maine_customer_id'=> authUser()->customer_id,
+                    'customer_id'      => authUser()->customer_id,
                     'hospital_id'      => isset($data['hospital_id']) ? trim($data['hospital_id']) : null,
                     'firm_id'          => isset($data['firm_id']) ? trim($data['firm_id']) : null,
                     'company_name'     => isset($data['company_name']) ? formatedName($data['company_name']) : null,
@@ -80,7 +80,7 @@ class PharmacyController extends Controller {
                     'created_at'       => now()
                 ];
                 
-                $lastId = DB::table('suppliers')->insertGetId($customer);
+                $lastId = DB::table('pharmacy_suppliers')->insertGetId($customer);
                 storeLog("Pharmacy Customer Created");
                 return json_response(true, 200, 'Pharmacy Customer created successfully.');
 
@@ -133,7 +133,7 @@ class PharmacyController extends Controller {
 
                 // Safe Helper to handle Null & Trim together
                 $supplier = [
-                    'maine_customer_id'=> authUser()->customer_id,
+                    'customer_id'      => authUser()->customer_id,
                     'hospital_id'      => isset($data['hospital_id']) ? trim($data['hospital_id']) : null,
                     'firm_id'          => isset($data['firm_id']) ? trim($data['firm_id']) : null,
                     'company_name'     => isset($data['company_name']) ? formatedName($data['company_name']) : null,
@@ -156,7 +156,7 @@ class PharmacyController extends Controller {
                     'created_at'       => now(),
                 ];
                 
-                $lastId = DB::table('suppliers')->insertGetId($supplier);
+                $lastId = DB::table('pharmacy_suppliers')->insertGetId($supplier);
                 storeLog("Supplier Created");
                 return json_response(true, 200, 'Supplier created successfully.');
 
@@ -171,7 +171,7 @@ class PharmacyController extends Controller {
 
 
     // Vendor Start
-            public function vendor(Request $request) {
+        public function vendor(Request $request) {
             if ($request->ajax()) {
                 $view = view("backend.pharmacy.vendor.index");
                 return $view->renderSections()['content']; 
@@ -206,10 +206,9 @@ class PharmacyController extends Controller {
                 if ($validation) {
                     return json_response(false, 410, "Validation failed", $validation);
                 }
-
                 // Safe Helper to handle Null & Trim together
                 $vendor = [
-                    'maine_customer_id'=> authUser()->customer_id,
+                    'customer_id'      => authUser()->customer_id,
                     'hospital_id'      => isset($data['hospital_id']) ? trim($data['hospital_id']) : null,
                     'firm_id'          => isset($data['firm_id']) ? trim($data['firm_id']) : null,
                     'company_name'     => isset($data['company_name']) ? formatedName($data['company_name']) : null,
@@ -220,13 +219,16 @@ class PharmacyController extends Controller {
                     'gst_no'           => isset($data['gst_no']) ? gstNumber($data['gst_no']) : null,
                     'pan_no'           => isset($data['pan_no']) ? panNumber($data['pan_no']) : null,
                     'contact'          => isset($data['contact']) ? trim($data['contact']) : null,
+                    'address'          => isset($data['address']) ? trim($data['address']) : null,
                     'doctor_address'   => isset($data['doctor_address']) ? trim($data['doctor_address']) : null,
-                    'status'           => 1,
+                    'balance_type'     => isset($data['balance_type']) ? (int) $data['balance_type'] : 1,
+                    'drug_license_no'  => isset($data['drug_license_no']) ? drugLicence($data['drug_license_no']) : null,
                     'party_type'       => 4,
+                    'status'           => 1,
                     'created_at'       => now()
                 ];
                 
-                $lastId = DB::table('suppliers')->insertGetId($vendor);
+                $lastId = DB::table('pharmacy_suppliers')->insertGetId($vendor);
                 storeLog("Vendor Created");
                 return json_response(true, 200, 'Vendor created successfully.');
 
@@ -240,8 +242,140 @@ class PharmacyController extends Controller {
 
 
     // Madicine Start
-        public function madicine() {
+        public function madicine(Request $request) {
+            if ($request->ajax()) {
+                $view = view("backend.pharmacy.madicine.index");
+                return $view->renderSections()['content']; 
+            }
             return view("backend.pharmacy.madicine.index");
+        }
+
+        public function madicineCreate(Request $request) {
+            $suppliers = DB::table('pharmacy_suppliers')->where('customer_id', authUser()->customer_id)
+                            ->whereIn('party_type', [2,3,4])
+                            ->pluck('name', 'id')->toArray();
+
+            $categories = DB::table('pharmacy_categories')->where('customer_id', authUser()->customer_id)
+                            ->pluck('name', 'id')->toArray();
+
+            if ($request->ajax()) {
+                $view = view("backend.pharmacy.madicine.create", [
+                            'suppliers' => $suppliers,
+                            'categories' => $categories,
+                        ]);
+
+                return $view->renderSections()['content'];
+            }
+            return view("backend.pharmacy.madicine.index", [
+                'suppliers' => $suppliers,
+                'categories' => $categories,
+            ]); // Normal load par index par hi rakhe
+        }
+
+        public function madicineSave(Request $request) {
+            try {
+                $data = $request->all();
+                $validation = $this->validationPartySupplierTrait($data);
+                if ($validation) {
+                    return json_response(false, 410, "Validation failed", $validation);
+                }
+                // Safe Helper to handle Null & Trim together
+                $vendor = [
+                    'customer_id'      => authUser()->customer_id,
+                    'hospital_id'      => isset($data['hospital_id']) ? trim($data['hospital_id']) : null,
+                    'firm_id'          => isset($data['firm_id']) ? trim($data['firm_id']) : null,
+                    'company_name'     => isset($data['company_name']) ? formatedName($data['company_name']) : null,
+                    'name'             => isset($data['name']) ? formatedName($data['name']) : null,
+                    'slug'             => isset($data['name']) ? formatedSlug($data['name']) : null,
+                    'doctor_name'      => isset($data['doctor_name']) ? formatedName($data['doctor_name']) : null,
+                    'email'            => isset($data['email']) ? formatedEmail($data['email']) : null,
+                    'gst_no'           => isset($data['gst_no']) ? gstNumber($data['gst_no']) : null,
+                    'pan_no'           => isset($data['pan_no']) ? panNumber($data['pan_no']) : null,
+                    'contact'          => isset($data['contact']) ? trim($data['contact']) : null,
+                    'address'          => isset($data['address']) ? trim($data['address']) : null,
+                    'doctor_address'   => isset($data['doctor_address']) ? trim($data['doctor_address']) : null,
+                    'balance_type'     => isset($data['balance_type']) ? (int) $data['balance_type'] : 1,
+                    'drug_license_no'  => isset($data['drug_license_no']) ? drugLicence($data['drug_license_no']) : null,
+                    'party_type'       => 4,
+                    'status'           => 1,
+                    'created_at'       => now()
+                ];
+                
+                $lastId = DB::table('pharmacy_suppliers')->insertGetId($vendor);
+                storeLog("Vendor Created");
+                return json_response(true, 200, 'Vendor created successfully.');
+
+            } catch(Throwable $th) {
+                Log::error(['message' => $th->getMessage()]);
+                return redirect()->back()->with('error', 'Export Error: ' . $th->getMessage());
+            }
+        }
+
+        public function batchCreate(Request $request) {
+            $suppliers = DB::table('pharmacy_suppliers')->where('customer_id', authUser()->customer_id)
+                            ->whereIn('party_type', [2,3,4])
+                            ->pluck('name', 'id')->toArray();
+
+            $vendors = DB::table('pharmacy_suppliers')->where('customer_id', authUser()->customer_id)
+                            ->where('party_type', 4)
+                            ->pluck('name', 'id')->toArray();
+
+            $medicines = DB::table('pharmacy_categories')->where('customer_id', authUser()->customer_id)
+                            ->pluck('name', 'id')->toArray();
+
+            if ($request->ajax()) {
+                $view = view("backend.pharmacy.madicine.batch", [
+                            'suppliers' => $suppliers,
+                            'medicines' => $medicines,
+                            'vendors' => $vendors,
+                        ]);
+                
+                return $view->renderSections()['content'];
+            }
+            return view("backend.pharmacy.madicine.index", [
+                'suppliers' => $suppliers,
+                'medicines' => $medicines,
+                'vendors' => $vendors,
+            ]); // Normal load par index par hi rakhe
+        }
+
+        public function batchSave(Request $request) {
+            try {
+                $data = $request->all();
+                $validation = $this->validationPartySupplierTrait($data);
+                if ($validation) {
+                    return json_response(false, 410, "Validation failed", $validation);
+                }
+                // Safe Helper to handle Null & Trim together
+                $vendor = [
+                    'customer_id'      => authUser()->customer_id,
+                    'hospital_id'      => isset($data['hospital_id']) ? trim($data['hospital_id']) : null,
+                    'firm_id'          => isset($data['firm_id']) ? trim($data['firm_id']) : null,
+                    'company_name'     => isset($data['company_name']) ? formatedName($data['company_name']) : null,
+                    'name'             => isset($data['name']) ? formatedName($data['name']) : null,
+                    'slug'             => isset($data['name']) ? formatedSlug($data['name']) : null,
+                    'doctor_name'      => isset($data['doctor_name']) ? formatedName($data['doctor_name']) : null,
+                    'email'            => isset($data['email']) ? formatedEmail($data['email']) : null,
+                    'gst_no'           => isset($data['gst_no']) ? gstNumber($data['gst_no']) : null,
+                    'pan_no'           => isset($data['pan_no']) ? panNumber($data['pan_no']) : null,
+                    'contact'          => isset($data['contact']) ? trim($data['contact']) : null,
+                    'address'          => isset($data['address']) ? trim($data['address']) : null,
+                    'doctor_address'   => isset($data['doctor_address']) ? trim($data['doctor_address']) : null,
+                    'balance_type'     => isset($data['balance_type']) ? (int) $data['balance_type'] : 1,
+                    'drug_license_no'  => isset($data['drug_license_no']) ? drugLicence($data['drug_license_no']) : null,
+                    'party_type'       => 4,
+                    'status'           => 1,
+                    'created_at'       => now()
+                ];
+                
+                $lastId = DB::table('pharmacy_suppliers')->insertGetId($vendor);
+                storeLog("Vendor Created");
+                return json_response(true, 200, 'Vendor created successfully.');
+
+            } catch(Throwable $th) {
+                Log::error(['message' => $th->getMessage()]);
+                return redirect()->back()->with('error', 'Export Error: ' . $th->getMessage());
+            }
         }
 
     // Madicine End

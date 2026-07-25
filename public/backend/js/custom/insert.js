@@ -8,7 +8,7 @@ $.ajaxSetup({
 // let addMoreRows=2;
 
 
-// Create Page Management Start
+// When click on add button than redirect create page without page load Start
     function loadPage(url, addHistory = true) {
         $.ajax({
             url: url,
@@ -28,6 +28,8 @@ $.ajaxSetup({
             }
         });
     }
+
+
     // Global click listeners jo naye dynamically loaded buttons par bhi kaam karein
     $(document).on('click', '#addCustomer', function(e){
         e.preventDefault();
@@ -50,6 +52,18 @@ $.ajaxSetup({
         
     });
     $(document).on('click', '#addPharmacyVendor', function(e){
+        e.preventDefault();
+        let url = $(this).data('url');
+        loadPage(url);
+        
+    });
+    $(document).on('click', '#addMadicine', function(e){
+        e.preventDefault();
+        let url = $(this).data('url');
+        loadPage(url);
+        
+    });
+    $(document).on('click', '#addBatchMadicine', function(e){
         e.preventDefault();
         let url = $(this).data('url');
         loadPage(url);
@@ -83,7 +97,17 @@ $.ajaxSetup({
         e.preventDefault();
         loadPage(window.PharmacyVendorListUrl);
     });
-// Create Page Management End
+
+    $(document).off('click', '#backPharmacyMadicineList').on('click', '#backPharmacyMadicineList', function(e){
+        e.preventDefault();
+        loadPage(window.PharmacyMadicineListUrl);
+    });
+
+    $(document).off('click', '#backPharmacyBatchMadicineList').on('click', '#backPharmacyBatchMadicineList', function(e){
+        e.preventDefault();
+        loadPage(window.PharmacyMadicineListUrl);
+    });
+// When click on add button than redirect create page without page load End
 
 
 
@@ -1303,20 +1327,14 @@ $.ajaxSetup({
             },
             error: function(xhr) {
                 $('.saveCustomerBtn').prop('disabled', false);
-                // 422 standard validation rules handling
-                if (xhr.status === 422 && xhr.responseJSON.errors) {
-                    let errors = xhr.responseJSON.errors;
-                    for(let key in errors) {
-                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
-                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                let response = xhr.responseJSON.data;
+                if(response) {
+                    for(let key in response) {
+                        console.log(response[key][0]);
+                        validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "OOP's");
                     }
                 } else {
-                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
-                    if(response) {
-                        for(let key in response) {
-                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
-                        }
-                    }
+                    validationAlert('Error', 'Unexpected server error', 'error', 5000, "OOP's");
                 }
             }
         });
@@ -1454,26 +1472,20 @@ $.ajaxSetup({
             success: function(res) {
                 $('.savePharmacyCustomerBtn').prop('disabled', false);
                 if(res.code == 200) {
-                    validationAlert('Customer created', res.message, 'success', 2000, 'OK');
+                    validationAlert('Pharmacy customer created', res.message, 'success', 2000, 'OK');
                     loadPage(window.PharmacyCustomerListUrl);
                 }
             },
             error: function(xhr) {
                 $('.savePharmacyCustomerBtn').prop('disabled', false);
-                // 422 standard validation rules handling
-                if (xhr.status === 422 && xhr.responseJSON.errors) {
-                    let errors = xhr.responseJSON.errors;
-                    for(let key in errors) {
-                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
-                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                let response = xhr.responseJSON.data;
+                if(response) {
+                    for(let key in response) {
+                        console.log(response[key][0]);
+                        validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "OOP's");
                     }
                 } else {
-                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
-                    if(response) {
-                        for(let key in response) {
-                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
-                        }
-                    }
+                    validationAlert('Error', 'Unexpected server error', 'error', 5000, "OOP's");
                 }
             }
         });
@@ -1564,19 +1576,14 @@ $.ajaxSetup({
             },
             error: function(xhr) {
                 $('.savePharmacySupplierBtn').prop('disabled', false);
-                if (xhr.status === 422 && xhr.responseJSON.errors) { // 422 standard validation rules handling
-                    let errors = xhr.responseJSON.errors;
-                    for(let key in errors) {
-                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
-                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                let response = xhr.responseJSON.data;
+                if(response) {
+                    for(let key in response) {
+                        console.log(response[key][0]);
+                        validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "OOP's");
                     }
                 } else {
-                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
-                    if(response) {
-                        for(let key in response) {
-                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
-                        }
-                    }
+                    validationAlert('Error', 'Unexpected server error', 'error', 5000, "OOP's");
                 }
             }
         });
@@ -1584,7 +1591,7 @@ $.ajaxSetup({
 
 
 
-    function savePharmacyVendor(e) { 
+    function savePharmacyVendor(e) {
         e.preventDefault(); 
         $('.savePharmacyVendorBtn').prop('disabled', true); 
         // Regex Patterns
@@ -1601,6 +1608,7 @@ $.ajaxSetup({
             'pan_no'            : $("#pan_no").val().trim(), 
             'doctor_name'       : $("#doctor_name").val().trim(), 
             'doctor_address'    : $("#doctor_address").val().trim(),
+            'drug_license_no'   : $("#drug_license_no").val().trim(), 
         }; 
 
         // Configuration rules
@@ -1648,25 +1656,190 @@ $.ajaxSetup({
             success: function(res) {
                 $('.savePharmacyVendorBtn').prop('disabled', false);
                 if(res.code == 200) {
-                    validationAlert('Vendor created', res.message, 'success', 2000, 'OK');
+                    validationAlert('Pharmacy vendor created', res.message, 'success', 2000, 'OK');
                     loadPage(window.PharmacyVendorListUrl);
                 }
             },
             error: function(xhr) {
                 $('.savePharmacyVendorBtn').prop('disabled', false);
-                if (xhr.status === 422 && xhr.responseJSON.errors) { // 422 standard validation rules handling
-                    let errors = xhr.responseJSON.errors;
-                    for(let key in errors) {
-                        validationAlert('Validation Error', errors[key][0], 'error', 5000, "Oops");
-                        break; // Sirf pehla error dikhane ke liye loop break kar dein
+                let response = xhr.responseJSON;
+                if(response) {
+                    for(let key in response) {
+                        console.log(response[key]);
+                        validationAlert('Validation Error', response[key] || 'Validation failed', 'error', 5000, "OOP's");
                     }
                 } else {
-                    let response = xhr.responseJSON ? xhr.responseJSON.data : null;
-                    if(response) {
-                        for(let key in response) {
-                            validationAlert('Validation Error', response[key][0] || 'Validation failed', 'error', 5000, "Oops");
-                        }
+                    validationAlert('Error', 'Unexpected server error', 'error', 5000, "OOP's");
+                }
+            }
+        });
+    }
+
+
+    function savePharmacyMadicine(e) {
+        e.preventDefault(); 
+        $('.savePharmacyMadicineBtn').prop('disabled', true); 
+        // Regex Patterns
+        const intPattern = /^\d+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let data = { 
+            'hospital_id'       : $("#hospital_id").val().trim(), 
+            'firm_id'           : $("#firm_id").val().trim(), 
+            'company_name'      : $("#company_name").val().trim(), 
+            'name'              : $("#name").val().trim(), 
+            'email'             : $("#email").val().trim(), 
+            'contact'           : $("#contact").val().trim(), 
+            'gst_no'            : $("#gst_no").val().trim(), 
+            'pan_no'            : $("#pan_no").val().trim(), 
+            'doctor_name'       : $("#doctor_name").val().trim(), 
+            'doctor_address'    : $("#doctor_address").val().trim(),
+            'drug_license_no'   : $("#drug_license_no").val().trim(), 
+        }; 
+
+        // Configuration rules
+        const validationRules = [
+            { key: 'company_name',    type: 'string',  label: 'company name' },
+            { key: 'name',            type: 'string',  label: 'name' },
+            { key: 'email',           type: 'email',   label: 'email' },
+            { key: 'contact',         type: 'integer', label: 'contact number', msg: 'Please enter a valid contact (numbers only).' },
+            { key: 'gst_no',          type: 'string',  label: 'gst no' },
+            { key: 'pan_no',          type: 'string',  label: 'pan no' },
+            { key: 'doctor_name',     type: 'string',  label: 'doctor name' },
+            { key: 'doctor_address',  type: 'string',  label: 'doctor address' },
+        ];
+
+        for (let rule of validationRules) {
+            let value = data[rule.key];
+            if (value === '') {
+                validationAlert(`Missing ${rule.label}`, `Please enter ${rule.label}.`, 'error', 5000, 'OK');
+                $('.savePharmacyMadicineBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'integer' && !intPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyMadicineBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'email' && !emailPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyMadicineBtn').prop('disabled', false);
+                return false;
+            }
+        }
+        submitPharmacyMadicine(data);
+    }
+
+    function submitPharmacyMadicine(data) {
+        let url = window.PharmacyMadicineSubmitUrl; 
+        data._token = $('meta[name="csrf-token"]').attr('content'); // CSRF Token ko data object me add kar dein
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: data,
+            success: function(res) {
+                $('.savePharmacyMadicineBtn').prop('disabled', false);
+                if(res.code == 200) {
+                    validationAlert('Pharmacy Madicine created', res.message, 'success', 2000, 'OK');
+                    loadPage(window.PharmacyMadicineListUrl);
+                }
+            },
+            error: function(xhr) {
+                $('.savePharmacyMadicineBtn').prop('disabled', false);
+                let response = xhr.responseJSON;
+                if(response) {
+                    for(let key in response) {
+                        console.log(response[key]);
+                        validationAlert('Validation Error', response[key] || 'Validation failed', 'error', 5000, "OOP's");
                     }
+                } else {
+                    validationAlert('Error', 'Unexpected server error', 'error', 5000, "OOP's");
+                }
+            }
+        });
+    }
+
+
+    function savePharmacyBatchMadicine(e) {
+        e.preventDefault(); 
+        $('.savePharmacyBatchMadicineBtn').prop('disabled', true); 
+        // Regex Patterns
+        const intPattern = /^\d+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        let data = { 
+            'hospital_id'       : $("#hospital_id").val().trim(), 
+            'firm_id'           : $("#firm_id").val().trim(), 
+            'company_name'      : $("#company_name").val().trim(), 
+            'name'              : $("#name").val().trim(), 
+            'email'             : $("#email").val().trim(), 
+            'contact'           : $("#contact").val().trim(), 
+            'gst_no'            : $("#gst_no").val().trim(), 
+            'pan_no'            : $("#pan_no").val().trim(), 
+            'doctor_name'       : $("#doctor_name").val().trim(), 
+            'doctor_address'    : $("#doctor_address").val().trim(),
+            'drug_license_no'   : $("#drug_license_no").val().trim(), 
+        }; 
+
+        // Configuration rules
+        const validationRules = [
+            { key: 'company_name',    type: 'string',  label: 'company name' },
+            { key: 'name',            type: 'string',  label: 'name' },
+            { key: 'email',           type: 'email',   label: 'email' },
+            { key: 'contact',         type: 'integer', label: 'contact number', msg: 'Please enter a valid contact (numbers only).' },
+            { key: 'gst_no',          type: 'string',  label: 'gst no' },
+            { key: 'pan_no',          type: 'string',  label: 'pan no' },
+            { key: 'doctor_name',     type: 'string',  label: 'doctor name' },
+            { key: 'doctor_address',  type: 'string',  label: 'doctor address' },
+        ];
+
+        for (let rule of validationRules) {
+            let value = data[rule.key];
+            if (value === '') {
+                validationAlert(`Missing ${rule.label}`, `Please enter ${rule.label}.`, 'error', 5000, 'OK');
+                $('.savePharmacyBatchMadicineBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'integer' && !intPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyBatchMadicineBtn').prop('disabled', false);
+                return false;
+            }
+            
+            if (rule.type === 'email' && !emailPattern.test(value)) {
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK');
+                $('.savePharmacyBatchMadicineBtn').prop('disabled', false);
+                return false;
+            }
+        }
+        submitPharmacyBatchMadicine(data);
+    }
+
+    function submitPharmacyBatchMadicine(data) {
+        let url = window.PharmacyBatchMadicineSubmitUrl; 
+        data._token = $('meta[name="csrf-token"]').attr('content'); // CSRF Token ko data object me add kar dein
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: data,
+            success: function(res) {
+                $('.savePharmacyBatchMadicineBtn').prop('disabled', false);
+                if(res.code == 200) {
+                    validationAlert('Pharmacy batch madicine created', res.message, 'success', 2000, 'OK');
+                    loadPage(window.PharmacyMadicineListUrl);
+                }
+            },
+            error: function(xhr) {
+                $('.savePharmacyBatchMadicineBtn').prop('disabled', false);
+                let response = xhr.responseJSON;
+                if(response) {
+                    for(let key in response) {
+                        console.log(response[key]);
+                        validationAlert('Validation Error', response[key] || 'Validation failed', 'error', 5000, "OOP's");
+                    }
+                } else {
+                    validationAlert('Error', 'Unexpected server error', 'error', 5000, "OOP's");
                 }
             }
         });

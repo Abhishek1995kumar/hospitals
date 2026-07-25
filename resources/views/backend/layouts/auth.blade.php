@@ -53,14 +53,14 @@
     <div class="d-flex flex-column flex-root">
         <style>
             body {
-                background-image: url('assets/media/logos/slider.jpg');
+                background-image: url('backend/images/login.jpg');
                 background-size: cover;
                 background-repeat: no-repeat;
                 background-position: center center;
             }
 
             [data-theme="dark"] body {
-                background-image: url('assets/media/logos/slider.jpg');
+                background-image: url('backend/images/login.jpg');
             }
         </style>
         <div class="d-flex flex-lg-row flex-column-fluid" style="justify-content: end !important;">

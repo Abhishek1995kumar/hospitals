@@ -7,12 +7,20 @@
 		.justify-content {
 			right !important;
 		}
+		.hero-banner {
+			background-image: url('backend/images/login.webp'); 
+			background-size: cover; 
+			background-position: center;  /* Center the image horizontally and vertically */
+			background-repeat: no-repeat;
+			height: 400px; 
+			width: 100%;
+		}
 	</style>
 @endsection
 
 @section('content')
 	<div class="d-flex justify-content p-5">
-		<div class="bg-body d-flex flex-center rounded-4 w-md-400px p-5">
+		<div class="bg-body d-flex flex-center rounded-4 w-md-400px p-5 ">
 			<div class="w-md-500px">
 				<form class="form" novalidate="novalidate" id="kt_sign_in_form" action="{{ url('/auth') }}" method="post">
 					<div class="text-center mb-11">

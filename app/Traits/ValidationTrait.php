@@ -107,45 +107,6 @@ trait ValidationTrait {
 
     public function loginValidationTrait($data) {
         try {
-            $rules = [
-                'login' => ['required', 'string', 'max:255'],
-                'password' => ['required', 'string', 'min:3', 'max:255'],
-            ];
-
-            $messages = [
-                'login.required' => 'The login field is required.',
-                'login.string' => 'The login must be a string.',
-                'login.max' => 'The login may not be greater than 255 characters.',
-                'password.required' => 'The password field is required.',
-                'password.string' => 'The password must be a string.',
-                'password.min' => 'The password may not be less than 3 characters.',
-                'password.max' => 'The password may not be greater than 255 characters.',
-            ];
-            
-            $errors = [];
-            foreach ($rules as $field => $fieldRules) {
-                $value = $data[$field] ?? null;
-                foreach ($fieldRules as $rule) {
-                    if ($rule === 'required' && empty($value)) {
-                        $errors[$field][] = $messages["{$field}.required"];
-
-                    } elseif ($rule === 'string' && !is_string($value)) {
-                        $errors[$field][] = $messages["{$field}.string"];
-
-                    } elseif (Str::startsWith($rule, 'max:')) {
-                        $max = (int)Str::after($rule, 'max:');
-                        if (strlen($value) > $max) {
-                            $errors[$field][] = $messages["{$field}.max"];
-                        }
-                    } elseif (Str::startsWith($rule, 'min:')) {
-                        $min = (int)Str::after($rule, 'min:');
-                        if (strlen($value) < $min) {
-                            $errors[$field][] = $messages["{$field}.min"];
-                        }
-                    } 
-                }
-            }
-
             $loginInput = trim($data['login']);
             $encryptedLogin = secure($loginInput, 'E');
             $user = User::where(function ($query) use ($loginInput, $encryptedLogin) {
@@ -156,13 +117,30 @@ trait ValidationTrait {
                                 ->orWhere('username', $loginInput); // Username generally encrypted nahi hota
                         })->first();
             if (!$user) {
-                $errors["login"][] = "Invalid user credential";
+                return $errors["login"][] = "Invalid user credential";
+            }
 
-            }
+            $rules = [
+                'login' => ['required'],
+                'password' => ['required'],
+            ];
+
+            $messages = [
+                'login.required' => 'The login field is required.',
+                'password.required' => 'The password field is required.',
+            ];
             
-            if (!empty($errors)) {
-                return  $errors;
+            $errors = [];
+            foreach ($rules as $field => $fieldRules) {
+                $value = $data[$field] ?? null;
+                foreach ($fieldRules as $rule) {
+                    if ($rule === 'required' && empty($value)) {
+                        $errors[$field][] = $messages["{$field}.required"];
+
+                    }
+                }
             }
+            return $errors;
 
         } catch(Throwable $th) {
             Log::error(['message' => $th->getMessage()]);
@@ -174,6 +152,9 @@ trait ValidationTrait {
         public function departmentValidationTrait($data) {
             try {
                 $department = Department::where('name', $data['name'])->first();
+                if(!empty($department)) {
+                    return $errors['name'][] = 'Already department exists, please enter anyother department name.';
+                }
                 $rules = [
                     'name' => ['required', 'string', 'max:255'],
                     'description' => ['string', 'max:255'],
@@ -206,11 +187,6 @@ trait ValidationTrait {
                         }
                     }
                 }
-
-                if(!empty($department)) {
-                    $errors['name'][] = 'Already department exists, please enter anyother department name.';
-                }
-
                 return $errors;
 
             } catch(Throwable $th) {
@@ -226,6 +202,12 @@ trait ValidationTrait {
             try {
                 $departments = Department::where('deleted_at', null)->where('id', json_decode($data['department_id']))->get();
                 $designation = Designation::where('name', $data['name'])->first();
+                if(empty($departments)){
+                    return $errors['department_id'][] = 'Invalid department selected.';
+                }
+                if(!empty($designation)){
+                    return $errors['name'][] = 'Already designation exists, please enter anyother designation name.';
+                }
                 $rules = [
                     'name' => ['required', 'string', 'max:255'],
                     'description' => ['string', 'max:255'],
@@ -260,15 +242,6 @@ trait ValidationTrait {
                         }
                     }
                 }
-
-                if(empty($departments)){
-                    $errors['department_id'][] = 'Invalid department selected.';
-                }
-                
-                if(!empty($designation)){
-                    $errors['name'][] = 'Already designation exists, please enter anyother designation name.';
-                }
-
                 return $errors;
                 
             } catch(Throwable $th) {
@@ -297,7 +270,10 @@ trait ValidationTrait {
                     $query->whereNull('customer_id');
                 }
                 $exists = $query->exists();
-                
+                if(!empty($exists)) {
+                    return $errors['code'][] = 'This role is already exists, please enter anyother role name.';
+                }
+
                 $rules = [
                     'name' => ['required', 'string', 'min:3', 'max:255'],
                     'hospital_id' => ['nullable'],
@@ -359,10 +335,6 @@ trait ValidationTrait {
                         }
                     }
                 }
-                if(!empty($exists)) {
-                    $errors['code'][] = 'This role is already exists, please enter anyother role name.';
-                }
-
                 return $errors;
 
             } catch(Throwable $th) {
@@ -418,7 +390,7 @@ trait ValidationTrait {
                 $value = $moduleSlug . '.' . $permissionName;
                 $exists = DB::table('permissions')->where('action', $value)->exists();
                 if ($exists) {
-                    $errors['action'][] = 'This permission is already exists.';
+                    return $errors['action'][] = 'This permission is already exists.';
                 }
                 $rules = [
                     'permission' => ['required', 'string', 'min:3', 'max:100'],
@@ -600,7 +572,7 @@ trait ValidationTrait {
                 $code  = trim(preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($data['name'])));
                 $exists = DB::table('modules')->where('slug', $code)->exists(); 
                 if(!empty($exists)) {
-                    $errors['name'][] = 'This module is already exists, please enter anyother module name.';
+                    return $errors['name'][] = 'This module is already exists, please enter anyother module name.';
                 }
 
                 $rules = [
@@ -653,7 +625,7 @@ trait ValidationTrait {
                 $code  = trim(str_replace(' ', '_', strtolower($data['name'])));
                 $exists = DB::table('modules')->where('slug', $code)->exists(); 
                 if(!empty($exists)) {
-                    $errors['name'][] = 'This module is already exists, please enter anyother module name.';
+                    return $errors['name'][] = 'This module is already exists, please enter anyother module name.';
                 }
 
                 $rules = [
@@ -719,7 +691,7 @@ trait ValidationTrait {
                 $planName   = trim($data['plan_name']);
                 $exists     = Plan::where('plan_name', $planName)->where('status', 1)->exists();
                 if(!empty($exists)) {
-                    $errors['plan_name'][] = 'This plan is already exists, please enter anyother plan name.';
+                    return $errors['plan_name'][] = 'This plan is already exists, please enter anyother plan name.';
                 }
 
                 $rules = [
@@ -797,7 +769,7 @@ trait ValidationTrait {
                 $featureName   = trim(preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($data['feature_name'])));
                 $exists     = Feature::where('feature_slug', $featureName)->where('status', 1)->exists();
                 if(!empty($exists)) {
-                    $errors['feature_name'][] = 'This feature is already exists, please enter anyother feature name.';
+                    return $errors['feature_name'][] = 'This feature is already exists, please enter anyother feature name.';
                 }
 
                 $rules = [
@@ -890,7 +862,7 @@ trait ValidationTrait {
                 $email   = trim($data['email']);
                 $exists  = Customer::where('email', $email)->where('status', 1)->exists();
                 if(!empty($exists)) {
-                    $errors['email'][] = 'This email is already exists, please enter anyother email.';
+                    return $errors['email'][] = 'This email is already exists, please enter anyother email.';
                 }
                 $rules = [
                     'customer_name' => ['required', 'string', 'min:3', 'max:100'],
@@ -976,19 +948,30 @@ trait ValidationTrait {
         public function validationPartySupplierTrait($data) {
             try {
                 $errors = [];
-                $email   = trim($data['email']);
-                $gst_no   = trim($data['gst_no']);
-                $exists  = DB::table('suppliers')->where('email', $email)
+                $email  = trim($data['email']);
+                $gst_no = trim($data['gst_no']);
+                $pan_no = trim($data['pan_no']);
+
+                $exists  = DB::table('pharmacy_suppliers')
                             ->where('gst_no', $gst_no)
                             ->where('status', 1)
                             ->exists();
+
+                $pan_no_exists  = DB::table('pharmacy_suppliers')
+                            ->where('pan_no', $pan_no)
+                            ->where('status', 1)
+                            ->exists();
+
                 if(!empty($exists)) {
-                    $errors['email'][] = 'This email is already exists, please enter anyother email.';
+                    return $errors['gst_no'][] = 'This gst number is already exists, please enter anyother gst number.';
                 }
-                if(trim($data['party_type']) == 2 || trim($data['party_type']) == 3) {
+                if(!empty($pan_no_exists)) {
+                    return $errors['pan_no'][] = 'This pan number is already exists, please enter anyother pan number.';
+                }
+                if(trim($data['party_type']) == 2 || trim($data['party_type']) == 3 || trim($data['party_type']) == 4) {
                     $drugLicence = trim($data['drug_license_no']) ?? NULL;
                     if(!empty($drugLicence) && !drugLicence($drugLicenseInput)) {
-                        $errors['drug_license_no'][] = 'Invalid Drug License Number format.';
+                        return $errors['drug_license_no'][] = 'Invalid Drug License Number format.';
                     }
                 }
                 
@@ -1075,6 +1058,7 @@ trait ValidationTrait {
                         }
                     }
                 }
+                
                 return $errors;
 
             } catch(Throwable $th) {

@@ -1,12 +1,12 @@
 "use strict";
-let csrf = document.querySelector('meta[name="csrf-token"]');
-if(csrf) {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': csrf.getAttribute('content')
-        }
-    });
-}
+// let csrf = document.querySelector('meta[name="csrf-token"]');
+// if(csrf) {
+//     $.ajaxSetup({
+//         headers: {
+//             'X-CSRF-TOKEN': csrf.getAttribute('content')
+//         }
+//     });
+// }
 
 // Common function to load records in a table with action buttons
     function loadDatabaseRecord(url, type, columns, tableId, editFn, deleteFn, showFn, editModalId = '', showModalId = '', emptyMsg = 'No records found') {
@@ -108,364 +108,348 @@ if(csrf) {
 
 
 // Accept Only Number function start 
-const acceptOnlyNumber = (event) => {
-    const input = event.target;
-    const value = input.value;
-    input.value = value.replace(/\D/g, '');
-    if (input.value.length >= 10) {
-        input.value = input.value.substring(0, 10);
-        event.preventDefault();
-    } else {
-        validationAlert('Invalid Input', "Please enter a valid " + (input.placeholder || input.name) + "\nonly numbers are allowed.", 'error', 2000, 'OK');
-    }
-};
+    const acceptOnlyNumber = (event) => {
+        const input = event.target;
+        const value = input.value;
+        input.value = value.replace(/\D/g, '');
+        if (input.value.length >= 10) {
+            input.value = input.value.substring(0, 10);
+            event.preventDefault();
+        } else {
+            validationAlert('Invalid Input', "Please enter a valid " + (input.placeholder || input.name) + "\nonly numbers are allowed.", 'error', 2000, 'OK');
+        }
+    };
 
 
 // Accept Only String function start
-const stringValidation = (event) => {
-    const input = event.target;
-    console.log(`Input field: ${input.placeholder || input.name}`, `Value: ${input.value}`);
-    const value = input.value;
-    const regex = /^[a-zA-Z][a-zA-Z0-9\s.,-]*$/;
-    if (!regex.test(value)) {
-        input.value = '';
-        Swal.fire({
-            title: 'Invalid Input',
-            text: "Please enter a valid " + (input.placeholder || input.name) + "\nonly alphanumeric characters, spaces, commas, periods, and hyphens are allowed.",
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    } else {
-        console.log(`Valid input for ${input.placeholder || input.name}: ${input.value}`);
-    }
-};   
+    const stringValidation = (event) => {
+        const input = event.target;
+        console.log(`Input field: ${input.placeholder || input.name}`, `Value: ${input.value}`);
+        const value = input.value;
+        const regex = /^[a-zA-Z][a-zA-Z0-9\s.,-]*$/;
+        if (!regex.test(value)) {
+            input.value = '';
+            Swal.fire({
+                title: 'Invalid Input',
+                text: "Please enter a valid " + (input.placeholder || input.name) + "\nonly alphanumeric characters, spaces, commas, periods, and hyphens are allowed.",
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            console.log(`Valid input for ${input.placeholder || input.name}: ${input.value}`);
+        }
+    };   
 
 
 // flatpickr calendar function start
-const openFlatpickr = (event) => {
-    let input = event.target;
-    // Arrays for restrictions
-    let blockNextDateArrays = ['date_of_birth']; // Past-only
-    let blockBackDateArrays = ['employee_last_working_date', 'interview_date']; // Future-only
-    let fromDateArray = ['leave_start_date', 'perchase_date', 'previous_doj_1', 'holiday_start_date'];  // FROM, From date ka aur to date ka index same hona chahiye
-    let toDateArray = ['leave_end_date', 'assigned_date', 'previous_doe_1', 'holiday_end_date'];  // To, To date ka aur From date ka index same hona chahiye, tab hi work karega
+    const openFlatpickr = (event) => {
+        let input = event.target;
+        // Agar user ne flatpickr dwara banaye gaye visual input par click kiya hai
+        // toh hum log uske original input ko target karenge:
+        if (input._flatpickr) {
+            input._flatpickr.open();
+            return;
+        }
 
-    if (!input._flatpickr) {
-        // Single leave
+        // Arrays for restrictions
+        let blockNextDateArrays = ['mfg_date']; // Past-only
+        let blockBackDateArrays = ['expiry_date']; // Future-only
+        let fromDateArray = ['leave_start_date', 'perchase_date', 'previous_doj_1', 'holiday_start_date']; // fromDateArray ka date indexing aur toDateArray ka date indexing same hona chahiye tab hi work karega
+        let toDateArray = ['leave_end_date', 'assigned_date', 'previous_doe_1', 'holiday_end_date'];
+        let options = {
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: "d F Y",
+            allowInput: true
+        };
+
         if (input.id === "leave_date") {
-            input._flatpickr = flatpickr(input, {
-                dateFormat: 'Y-m-d',
-                altInput: true,
-                altFormat: "d F Y",
-                allowInput: true
-            });
-
-        // From Date Handling
+            // Normal leave date
         } else if (fromDateArray.includes(input.id)) {
-            input._flatpickr = flatpickr(input, {
-                dateFormat: 'Y-m-d',
-                altInput: true,
-                altFormat: "d F Y",
-                allowInput: true,
-                onChange: function (selectedDates) {
-                    if (selectedDates.length > 0) {
-                        let fromDate = selectedDates[0];
-                        // Matching To-date field nikalna (array based mapping)
-                        let fromIndex = fromDateArray.indexOf(input.id);
-                        let toFieldId = toDateArray[fromIndex];  // same index ka pair lega
-                        let toDateInput = document.getElementById(toFieldId);
+            options.onChange = function (selectedDates) {
+                if (selectedDates.length > 0) {
+                    let fromDate = selectedDates[0];
+                    let fromIndex = fromDateArray.indexOf(input.id);
+                    let toFieldId = toDateArray[fromIndex];
+                    let toDateInput = document.getElementById(toFieldId);
 
-                        if (toDateInput) {
-                            // Enable To-date only after From-date is chosen
-                            toDateInput.removeAttribute("disabled");
+                    if (toDateInput) {
+                        toDateInput.removeAttribute("disabled");
 
-                            // Destroy previous instance if exists
-                            if (toDateInput._flatpickr) {
-                                toDateInput._flatpickr.destroy();
-                            }
-
-                            // Re-init with restriction
-                            toDateInput._flatpickr = flatpickr(toDateInput, {
-                                dateFormat: 'Y-m-d',
-                                altInput: true,
-                                altFormat: "d F Y",
-                                allowInput: true,
-                                minDate: fromDate
-                            });
+                        if (toDateInput._flatpickr) {
+                            toDateInput._flatpickr.destroy();
                         }
+                        toDateInput._flatpickr = flatpickr(toDateInput, {
+                            dateFormat: 'Y-m-d',
+                            altInput: true,
+                            altFormat: "d F Y",
+                            allowInput: true,
+                            minDate: fromDate
+                        });
                     }
                 }
-            });
-
-        // ✅ Only Past Dates
+            };
         } else if (blockNextDateArrays.includes(input.id)) {
-            input._flatpickr = flatpickr(input, {
-                dateFormat: 'Y-m-d',
-                altInput: true,
-                altFormat: "d F Y",
-                allowInput: true,
-                maxDate: 'today'
-            });
-
-        // ✅ Only Future Dates
+            options.maxDate = 'today';
         } else if (blockBackDateArrays.includes(input.id)) {
-            input._flatpickr = flatpickr(input, {
-                dateFormat: 'Y-m-d',
-                altInput: true,
-                altFormat: "d F Y",
-                allowInput: true,
-                minDate: 'today'
-            });
+            options.minDate = 'today';
+        } else {
+            // Agar koi unknown field id aati hai toh initialize na karein
+            return;
         }
-    }
 
-    input._flatpickr.open();
-};
-
+        // Flatpickr ko properly assign karke open karein
+        let fpInstance = flatpickr(input, options);
+        
+        // Auto-open calendar
+        if (fpInstance) {
+            fpInstance.open();
+        }
+    };
 
 
 // Show Three Month Befrore From Crruent Month And One Month After function start
-const showThreeMonthBefroreFromCrruentMonthAndOneMonthAfter = (event) => {
-    const input = event.target;
-    if (input.type !== 'text') {
-        console.warn(`Input field with ID ${input.id} is not a text date input.`);
-        return;
+    const showThreeMonthBefroreFromCrruentMonthAndOneMonthAfter = (event) => {
+        const input = event.target;
+        if (input.type !== 'text') {
+            console.warn(`Input field with ID ${input.id} is not a text date input.`);
+            return;
+        }
+        if (!input._flatpickr) {
+            const today = new Date();
+            const threeMonthsBefore = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+            const oneMonthAfter = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            input._flatpickr = flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                minDate: threeMonthsBefore,
+                maxDate: oneMonthAfter,
+                onChange: function (selectedDates, dateStr) {
+                    input.value = dateStr;
+                }
+            }); 
+        }
+        input._flatpickr.open();
     }
-    if (!input._flatpickr) {
-        const today = new Date();
-        const threeMonthsBefore = new Date(today.getFullYear(), today.getMonth() - 3, 1);
-        const oneMonthAfter = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        input._flatpickr = flatpickr(input, {
-            dateFormat: 'Y-m-d',
-            allowInput: true,
-            minDate: threeMonthsBefore,
-            maxDate: oneMonthAfter,
-            onChange: function (selectedDates, dateStr) {
-                input.value = dateStr;
-            }
-        }); 
-    }
-    input._flatpickr.open();
-}
 
 
 // Time Picker function start
-const timePicker = (event) => {
-    const input = event.target;
-    if (input.type !== 'text') {
-        console.warn(`Input field with ID ${input.id} is not a text time input.`);
-        return;
+    const timePicker = (event) => {
+        const input = event.target;
+        if (input.type !== 'text') {
+            console.warn(`Input field with ID ${input.id} is not a text time input.`);
+            return;
+        }
+        if (!input._flatpickr) {
+            input._flatpickr = flatpickr(input, {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "h:i K",
+                time_24hr: false,
+                allowInput: true,
+                defaultDate: "01:45 PM",
+                onChange: function (selectedDates, dateStr) {
+                    input.value = dateStr;
+                }
+            });
+        }
+        input._flatpickr.open();
     }
-    if (!input._flatpickr) {
-        input._flatpickr = flatpickr(input, {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "h:i K",
-            time_24hr: false,
-            allowInput: true,
-            defaultDate: "01:45 PM",
-            onChange: function (selectedDates, dateStr) {
-                input.value = dateStr;
-            }
-        });
-    }
-    input._flatpickr.open();
-}
 
 
 
 // Automatically calculate hours from the date input
-// document.addEventListener('DOMContentLoaded', function() {
-    function calculateTotalHour() {
-        let inTime = document.getElementById('in_time_outdoor').value;
-        let outTime = document.getElementById('out_time_outdoor').value;
-        inTime = inTime.split(' ')[0];
-        outTime = outTime.split(' ')[0];
-        const totalHourInput = document.getElementById('total_hour_outdoor');
-        if (inTime && outTime) {
-            const [inHour, inMin] = inTime.split(':').map(Number);
-            const [outHour, outMin] = outTime.split(':').map(Number);
-            let start = new Date();
-            let end = new Date();
-            start.setHours(inHour, inMin, 0, 0);
-            end.setHours(outHour, outMin, 0, 0);
-            let diff = (end - start) / 1000 / 60 / 60;
-            if (diff < 0) diff += 24;
-            totalHourInput.value = diff.toFixed(2);
-        } else {
-            totalHourInput.value = '';
+    // document.addEventListener('DOMContentLoaded', function() {
+        function calculateTotalHour() {
+            let inTime = document.getElementById('in_time_outdoor').value;
+            let outTime = document.getElementById('out_time_outdoor').value;
+            inTime = inTime.split(' ')[0];
+            outTime = outTime.split(' ')[0];
+            const totalHourInput = document.getElementById('total_hour_outdoor');
+            if (inTime && outTime) {
+                const [inHour, inMin] = inTime.split(':').map(Number);
+                const [outHour, outMin] = outTime.split(':').map(Number);
+                let start = new Date();
+                let end = new Date();
+                start.setHours(inHour, inMin, 0, 0);
+                end.setHours(outHour, outMin, 0, 0);
+                let diff = (end - start) / 1000 / 60 / 60;
+                if (diff < 0) diff += 24;
+                totalHourInput.value = diff.toFixed(2);
+            } else {
+                totalHourInput.value = '';
+            }
         }
-    }
-//     document.getElementById('in_time_outdoor').addEventListener('change', calculateTotalHour);
-//     document.getElementById('out_time_outdoor').addEventListener('change', calculateTotalHour);
+    //     document.getElementById('in_time_outdoor').addEventListener('change', calculateTotalHour);
+    //     document.getElementById('out_time_outdoor').addEventListener('change', calculateTotalHour);
 // });
 
 
 // Multi Select Flatpickr Calendar function start
-const multiSelectFlatpickrCalendar = (event) => {
-    const input = event.target;
-    if (input.type !== 'text') {
-        console.warn(`Input field with ID ${input.id} is not a text date input.`);
-        return;
-    }
-    if (!input._flatpickr) {
-        // Calculate current year last date (December 31)
-        const today = new Date();
-        const lastDate = new Date(today.getFullYear(), 11, 31); // month is 0-indexed
+    const multiSelectFlatpickrCalendar = (event) => {
+        const input = event.target;
+        if (input.type !== 'text') {
+            console.warn(`Input field with ID ${input.id} is not a text date input.`);
+            return;
+        }
+        if (!input._flatpickr) {
+            // Calculate current year last date (December 31)
+            const today = new Date();
+            const lastDate = new Date(today.getFullYear(), 11, 31); // month is 0-indexed
 
-        input._flatpickr = flatpickr(input, {
-            mode: "multiple",
-            dateFormat: 'Y-m-d',
-            allowInput: true,
-            minDate: today,
-            maxDate: lastDate,
-            conjunction: " , ",
-            onChange: function (selectedDates, dateStr) {
-            input.value = dateStr;
-            }
-        });
-    }
-    input._flatpickr.open();
-};
+            input._flatpickr = flatpickr(input, {
+                mode: "multiple",
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                minDate: today,
+                maxDate: lastDate,
+                conjunction: " , ",
+                onChange: function (selectedDates, dateStr) {
+                input.value = dateStr;
+                }
+            });
+        }
+        input._flatpickr.open();
+    };
 
 
 
 // agar date picker automatically open hi rakhna hai tab onclick ki jagah onfocus use karein
-const initFlatpickrCalendar = (event) => {
-    const input = document.getElementById('apply_leave');
-    if (!input._flatpickr) {
-        input._flatpickr = flatpickr(input, {
-            inline: true,
-            mode: "multiple",
-            dateFormat: 'Y-m-d',
-            allowInput: true,
-            minDate: "today",
-            conjunction: " , ",
-            maxDate: new Date().fp_incr(365),
-            onChange: function (selectedDates, dateStr) {
-                input.value = dateStr;
-            }
-        });
-    }
-    input._flatpickr.open();
-};
+    const initFlatpickrCalendar = (event) => {
+        const input = document.getElementById('apply_leave');
+        if (!input._flatpickr) {
+            input._flatpickr = flatpickr(input, {
+                inline: true,
+                mode: "multiple",
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                minDate: "today",
+                conjunction: " , ",
+                maxDate: new Date().fp_incr(365),
+                onChange: function (selectedDates, dateStr) {
+                    input.value = dateStr;
+                }
+            });
+        }
+        input._flatpickr.open();
+    };
 
 
 // Handle Checkbox Selection and Show/Hide Divs
-function handleTypeCheckbox(type) {
-    let fixedCheckbox = document.getElementById('select_fixed_type');
-    let percentageCheckbox = document.getElementById('select_percentage_type');
-    if (type === 'fixed_amount_div') {
-        if (fixedCheckbox.checked) {
-            percentageCheckbox.checked = false;
-            ifcheckThanShowDiv(fixedCheckbox, 'fixed_amount_div');
-            ifcheckThanShowDiv(percentageCheckbox, 'percentage_amount_div');
-        }
-    } else if (type === 'percentage_amount_div') {
-        if (percentageCheckbox.checked) {
-            fixedCheckbox.checked = false;
-            ifcheckThanShowDiv(percentageCheckbox, 'percentage_amount_div');
-            ifcheckThanShowDiv(fixedCheckbox, 'fixed_amount_div');
-        }
-    }
-
-
-    let singleLeaveTypeCheckbox = document.getElementById('single_leave_type');
-    let multipleLeaveTypeCheckbox = document.getElementById('multiple_leave_type');
-    if (type === 'single_leave_type_div') {
-        if (singleLeaveTypeCheckbox.checked) {
-            multipleLeaveTypeCheckbox.checked = false;
-            ifcheckThanShowDiv(singleLeaveTypeCheckbox, 'single_leave_type_div');
-            ifcheckThanShowDiv(multipleLeaveTypeCheckbox, 'multiple_leave_type_div');
-        }
-    } else if (type === 'multiple_leave_type_div') {
-        if (multipleLeaveTypeCheckbox.checked) {
-            singleLeaveTypeCheckbox.checked = false;
-            ifcheckThanShowDiv(multipleLeaveTypeCheckbox, 'multiple_leave_type_div');
-            ifcheckThanShowDiv(singleLeaveTypeCheckbox, 'single_leave_type_div');
-        }
-    }
-
-    // Handle fixed time checkboxes start --
-        let yesFixed = [], noFixed = [];
-        for (let i = 1; i <= 8; i++) {
-            yesFixed.push(document.getElementById('fixed_time_yes_' + i));
-            noFixed.push(document.getElementById('fixed_time_no_' + i));
-        }
-        // YES case
-        if (type.startsWith('fixed_time_div')) {
-            let index = type.split('_').pop();
-            if (yesFixed[index - 1].checked) {
-                noFixed[index - 1].checked = false;
-                document.getElementById('fixed_time_div_' + index).style.display = 'block';
-            } else {
-                document.getElementById('fixed_time_div_' + index).style.display = 'none';
+    function handleTypeCheckbox(type) {
+        let fixedCheckbox = document.getElementById('select_fixed_type');
+        let percentageCheckbox = document.getElementById('select_percentage_type');
+        if (type === 'fixed_amount_div') {
+            if (fixedCheckbox.checked) {
+                percentageCheckbox.checked = false;
+                ifcheckThanShowDiv(fixedCheckbox, 'fixed_amount_div');
+                ifcheckThanShowDiv(percentageCheckbox, 'percentage_amount_div');
+            }
+        } else if (type === 'percentage_amount_div') {
+            if (percentageCheckbox.checked) {
+                fixedCheckbox.checked = false;
+                ifcheckThanShowDiv(percentageCheckbox, 'percentage_amount_div');
+                ifcheckThanShowDiv(fixedCheckbox, 'fixed_amount_div');
             }
         }
-        // NO case
-        if (type.startsWith('no_fixed_time_div')) {
+
+
+        let singleLeaveTypeCheckbox = document.getElementById('single_leave_type');
+        let multipleLeaveTypeCheckbox = document.getElementById('multiple_leave_type');
+        if (type === 'single_leave_type_div') {
+            if (singleLeaveTypeCheckbox.checked) {
+                multipleLeaveTypeCheckbox.checked = false;
+                ifcheckThanShowDiv(singleLeaveTypeCheckbox, 'single_leave_type_div');
+                ifcheckThanShowDiv(multipleLeaveTypeCheckbox, 'multiple_leave_type_div');
+            }
+        } else if (type === 'multiple_leave_type_div') {
+            if (multipleLeaveTypeCheckbox.checked) {
+                singleLeaveTypeCheckbox.checked = false;
+                ifcheckThanShowDiv(multipleLeaveTypeCheckbox, 'multiple_leave_type_div');
+                ifcheckThanShowDiv(singleLeaveTypeCheckbox, 'single_leave_type_div');
+            }
+        }
+
+        // Handle fixed time checkboxes start --
+            let yesFixed = [], noFixed = [];
             for (let i = 1; i <= 8; i++) {
-                yesFixed[i - 1].checked = false;
-                document.getElementById('fixed_time_div_' + i).style.display = 'none';
+                yesFixed.push(document.getElementById('fixed_time_yes_' + i));
+                noFixed.push(document.getElementById('fixed_time_no_' + i));
             }
-        }
-    // Handle fixed time checkboxes end --
-
-
-    // Handle late applicable checkboxes start --
-        let yesLate = document.getElementById('yes_late_applicable');
-        let noLate = document.getElementById('no_late_applicable');
-        if (type === 'yes_late_woking_applicable_div') {
-            noLate.checked = false;
-            ifcheckThanShowDiv(yesLate, 'yes_late_woking_applicable_div');
-            ifcheckThanShowDiv(noLate, 'no_late_woking_applicable_div');
-
-        } else if (type === 'no_late_woking_applicable_div') {
-            yesLate.checked = false;
-            ifcheckThanShowDiv(noLate, 'no_late_woking_applicable_div');
-            ifcheckThanShowDiv(yesLate, 'yes_late_woking_applicable_div');
-        }
-    // Handle late applicable checkboxes end --
-    
-
-    // Handle leave applicable checkboxes start --
-        let yesLeave = document.getElementById('yes_accrued_period');
-        let noLeave = document.getElementById('no_accrued_period');
-        if (type === 'yes_accrued_period_div') {
-            noLeave.checked = false;
-            ifcheckThanShowDiv(yesLeave, 'yes_accrued_period_div');
-            ifcheckThanShowDiv(noLeave, 'no_accrued_period_div');
-
-        } else if (type === 'no_accrued_period_div') {
-            yesLeave.checked = false;
-            ifcheckThanShowDiv(noLeave, 'no_accrued_period_div');
-            ifcheckThanShowDiv(yesLeave, 'yes_accrued_period_div');
-        }
-    // Handle leave applicable checkboxes end --
-
-    // Handle Leaves Carry Forward checkboxes start --
-        for (let i = 1; i <= 8; i++) {
-            if (type === 'yes_carry_forward_' + i) {
-                alert('yes_carry_forward_' + i);
-                document.getElementById('no_carry_forward_' + i).checked = false;
+            // YES case
+            if (type.startsWith('fixed_time_div')) {
+                let index = type.split('_').pop();
+                if (yesFixed[index - 1].checked) {
+                    noFixed[index - 1].checked = false;
+                    document.getElementById('fixed_time_div_' + index).style.display = 'block';
+                } else {
+                    document.getElementById('fixed_time_div_' + index).style.display = 'none';
+                }
             }
-            if (type === 'no_carry_forward_' + i) {
-                document.getElementById('yes_carry_forward_' + i).checked = false;
+            // NO case
+            if (type.startsWith('no_fixed_time_div')) {
+                for (let i = 1; i <= 8; i++) {
+                    yesFixed[i - 1].checked = false;
+                    document.getElementById('fixed_time_div_' + i).style.display = 'none';
+                }
             }
-        }
-    // Handle Leaves Carry Forward checkboxes end --
-}
+        // Handle fixed time checkboxes end --
+
+
+        // Handle late applicable checkboxes start --
+            let yesLate = document.getElementById('yes_late_applicable');
+            let noLate = document.getElementById('no_late_applicable');
+            if (type === 'yes_late_woking_applicable_div') {
+                noLate.checked = false;
+                ifcheckThanShowDiv(yesLate, 'yes_late_woking_applicable_div');
+                ifcheckThanShowDiv(noLate, 'no_late_woking_applicable_div');
+
+            } else if (type === 'no_late_woking_applicable_div') {
+                yesLate.checked = false;
+                ifcheckThanShowDiv(noLate, 'no_late_woking_applicable_div');
+                ifcheckThanShowDiv(yesLate, 'yes_late_woking_applicable_div');
+            }
+        // Handle late applicable checkboxes end --
+        
+
+        // Handle leave applicable checkboxes start --
+            let yesLeave = document.getElementById('yes_accrued_period');
+            let noLeave = document.getElementById('no_accrued_period');
+            if (type === 'yes_accrued_period_div') {
+                noLeave.checked = false;
+                ifcheckThanShowDiv(yesLeave, 'yes_accrued_period_div');
+                ifcheckThanShowDiv(noLeave, 'no_accrued_period_div');
+
+            } else if (type === 'no_accrued_period_div') {
+                yesLeave.checked = false;
+                ifcheckThanShowDiv(noLeave, 'no_accrued_period_div');
+                ifcheckThanShowDiv(yesLeave, 'yes_accrued_period_div');
+            }
+        // Handle leave applicable checkboxes end --
+
+        // Handle Leaves Carry Forward checkboxes start --
+            for (let i = 1; i <= 8; i++) {
+                if (type === 'yes_carry_forward_' + i) {
+                    alert('yes_carry_forward_' + i);
+                    document.getElementById('no_carry_forward_' + i).checked = false;
+                }
+                if (type === 'no_carry_forward_' + i) {
+                    document.getElementById('yes_carry_forward_' + i).checked = false;
+                }
+            }
+        // Handle Leaves Carry Forward checkboxes end --
+    }
 
 
 // Show/Hide Div based on checkbox state
-const ifcheckThanShowDiv = (checkboxElement, divId) => {
-    let targetDiv = document.getElementById(divId);
-    if (checkboxElement.checked) {
-        targetDiv.style.display = 'block';
-    } else {
-        targetDiv.style.display = 'none';
-    }
-};
+    const ifcheckThanShowDiv = (checkboxElement, divId) => {
+        let targetDiv = document.getElementById(divId);
+        if (checkboxElement.checked) {
+            targetDiv.style.display = 'block';
+        } else {
+            targetDiv.style.display = 'none';
+        }
+    };
 
 
 
