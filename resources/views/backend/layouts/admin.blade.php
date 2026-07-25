@@ -12,10 +12,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{asset('assets/media/logos/logos.png')}}" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
-    <link href="{{asset('backend/plugins/custom/datatables/datatables.bundle.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('backend/plugins/global/plugins.bundle.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('backend/css/style.bundle.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('backend/css/loader.css')}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/plugins/custom/datatables/datatables.bundle.css')}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/plugins/global/plugins.bundle.css')}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/css/style.bundle.css')}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('backend/css/loader.css')}}" rel="stylesheet" type="text/css" />
 
     <style>
         input[type=number]::-webkit-inner-spin-button,
@@ -54,10 +54,6 @@
         }
     </script>
     <div class="d-flex flex-column flex-root">
-        <?php 
-            $sessionData = session('user_auth_data');
-            
-        ?>
         <div class="page d-flex flex-row flex-column-fluid">
             <div id="kt_aside" class="aside" data-kt-drawer="true" data-kt-drawer-name="aside" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_aside_mobile_toggle">
                 <div class="aside-menu flex-column-fluid">
@@ -1087,10 +1083,10 @@
                                                             <img alt="Logo" src="" onerror="this.onerror=null;this.src='/assets/media/blank.png'" />
                                                         </div>
                                                         <div class="d-flex flex-column">
-                                                            <div class="fw-bold d-flex align-items-center fs-5"> {{ $sessionData->user_name ?? null }} </div>
-                                                            <a href="#" class="fw-semibold text-muted text-hover-primary fs-7"> {{ secure($sessionData->email, 'D') ?? null }} </a>
+                                                            <div class="fw-bold d-flex align-items-center fs-5"> {{ authUser()->user_name ?? null }} </div>
+                                                            <a href="#" class="fw-semibold text-muted text-hover-primary fs-7"> {{ secure(authUser()->email, 'D') ?? null }} </a>
                                                             <div class="fw-bold d-flex align-items-center fs-5">
-                                                                <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2"> {{ $sessionData->role_names ?? null }} </span>
+                                                                <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 ms-2"> {{ authUser()->role_names ?? null }} </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1211,9 +1207,8 @@
     <script src="{{asset('backend/plugins/custom/datatables/datatables.bundle.js')}}"></script>
     <script src="{{asset('backend/js/widgets.bundle.js')}}"></script>
     <script src="{{asset('backend/js/custom/widgets.js')}}"></script>
-
     <script src="{{asset('backend/js/push.min.js')}}"></script>
-
+    <script src="{{asset('backend/js/custom/comman.js')}}"></script>
     <script src="{{asset('backend/js/custom/insert.js')}}"></script>
     <script>
         // Loader -->
@@ -1262,8 +1257,12 @@
         window.SupplierSubmitUrl = "{{ url('admin/pharmacy/supplier/save') }}";
         window.PharmacyCustomerListUrl = "{{ url('admin/pharmacy/parties') }}";
         window.PharmacyCustomerSubmitUrl = "{{ url('admin/pharmacy/parties/save') }}";
+
         window.PharmacyVendorListUrl = "{{ url('admin/pharmacy/vendor') }}";
         window.PharmacyVendorSubmitUrl = "{{ url('admin/pharmacy/vendor/save') }}";
+        window.PharmacyMadicineListUrl = "{{ url('admin/pharmacy/madicine') }}";
+        window.PharmacyMadicineSubmitUrl = "{{ url('admin/pharmacy/madicine/save') }}";
+        window.PharmacyBatchMadicineSubmitUrl = "{{ url('admin/pharmacy/madicine/batch/save') }}";
     </script>
 
     @yield('scripts')

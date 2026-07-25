@@ -153,6 +153,10 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
 
         Route::group(['prefix' => 'madicine'], function () {
             Route::get('/', [PharmacyController::class, 'madicine'])->name('pharmacy.madicine');
+            Route::get('/create', [PharmacyController::class, 'madicineCreate'])->name('pharmacy.madicine.create');
+            Route::get('/save', [PharmacyController::class, 'madicineSave'])->name('pharmacy.madicine.save');
+            Route::get('batch/create', [PharmacyController::class, 'batchCreate'])->name('pharmacy.madicine.batch.create');
+            Route::get('batch/save', [PharmacyController::class, 'batchSave'])->name('pharmacy.madicine.batch.save');
         });
 
         Route::group(['prefix' => 'inventory'], function () {

@@ -108,6 +108,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-4 " id="drug_license_noDiv">
+                                    <div class="form-group">
+                                        <label class="required fs-6 fw-semibold mb-2">{{ __('Drug License Number')}}</label>
+                                        <input name="drug_license_no" id="drug_license_no" class="form-control" type="text" oninput="validateDrugLicence(this)" maxlength="25" placeholder="Enter drug license no" >
+                                        <span id="drugError" style="color: red; display: none;">{{ __('Drug License Number (e.g. MH-01-20B-1234)')}}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-footer modal-footer">
                             <button type="submit" form="vendorForm" class="btn btn-primary savePharmacyVendorBtn" id="" onclick="savePharmacyVendor(event)">Submit</button>

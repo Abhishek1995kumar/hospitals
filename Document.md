@@ -82,13 +82,15 @@
 
 
 # USER ROLE MAPPING
-
-
-
 - roles table isme all role honge jaha scope=0 and is_system=0 and customer_id=null ka mtlb hai Owner Company ka employee
 
 - permission isme data module table se data aur apna data jayega like(((Laboratory), View Lab, Reports, laboratory.view), ((Laboratory), Create Lab Report, laboratory.create), ((Shifts), Manage Shifts,shift.view))
 
 - role_permission table me mapping hoga roles ka permission ke sath matlab kiss role ko kya kya permission hogi
 
+
+
+
+## Google Apis
+- https://maps.googleapis.com/maps/api/js?key=AIzaSyBY5p5e5PtJuJLl_nRpjefL0S094jdhEP8&libraries=places
 
