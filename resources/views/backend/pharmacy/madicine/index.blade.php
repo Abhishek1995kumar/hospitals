@@ -3,7 +3,7 @@
 
 @section('style')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="{{ asset('assets/backend/css/comman.css') }}">
+    <link rel="stylesheet" href="{{ asset('backend/css/comman.css') }}">
 @endsection
 
 @section('breadcrumb')
@@ -59,6 +59,26 @@
                         <button class="nav-link" id="batchMadicineTabBtn" data-bs-toggle="tab" data-bs-target="#batchMadicineTab" type="button" role="tab"> {{ __('Batch Madicine Dashboard') }} </button>
                     </li>
                     @endpermission
+                    @permission('authentication.view')
+                        @if(authUser()->customer_id != '' || authUser()->customer_id != null)
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{{ asset('backend/documents/pharmacy/madicine_user.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                                <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                            </a>
+                        </li>
+                        @else
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" href="{{ asset('backend/documents/pharmacy/madicine_user.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="documentationTabBtn" href="{{ asset('backend/documents/pharmacy/madicine_developer.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-book-open"></i> {{ __('Developer Guide')}}
+                                </a>
+                            </li>
+                        @endif
+                    @endpermission
                 </ul>
             </div>
 
@@ -90,13 +110,16 @@
                             </div>
                         </div>
                         <div class="card-body table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="partyTable">
+                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="madicineTable">
                                 <thead>
                                     <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                         <th class="text-center">{{ __('Id')}}</th>
-                                        <th class="text-center">{{ __('Name')}}</th>
-                                        <th class="text-center">{{ __('Scope')}}</th>
-                                        <th class="text-center">{{ __('Priority')}}</th>
+                                        <th class="text-center">{{ __('Pharmacy Supplier')}}</th>
+                                        <th class="text-center">{{ __('Category')}}</th>
+                                        <th class="text-center">{{ __('Brand Name')}}</th>
+                                        <th class="text-center">{{ __('Generic Name')}}</th>
+                                        <th class="text-center">{{ __('HSN Code')}}</th>
+                                        <th class="text-center">{{ __('Min Reorder Level')}}</th>
                                         <th class="text-center">{{ __('Action')}}</th>
                                     </tr>
                                 </thead>
@@ -133,13 +156,15 @@
                             </div>
                         </div>
                         <div class="card-body table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="partyTable">
+                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="batchMadicineTable">
                                 <thead>
                                     <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                         <th class="text-center">{{ __('Id')}}</th>
-                                        <th class="text-center">{{ __('Name')}}</th>
-                                        <th class="text-center">{{ __('Scope')}}</th>
-                                        <th class="text-center">{{ __('Priority')}}</th>
+                                        <th class="text-center">{{ __('Pharmacy Supplier')}}</th>
+                                        <th class="text-center">{{ __('Medicine')}}</th>
+                                        <th class="text-center">{{ __('Batch Number')}}</th>
+                                        <th class="text-center">{{ __('Mfg Date')}}</th>
+                                        <th class="text-center">{{ __('Expiry Date')}}</th>
                                         <th class="text-center">{{ __('Action')}}</th>
                                     </tr>
                                 </thead>
@@ -159,14 +184,76 @@
 @section('scripts')
     <script src="{{ asset('backend/js/custom/comman.js') }}"></script>
     <script>
-        // let url = '/admin/pharmacy/madicine';
-        // loadData('madicine', url);
-        // $('#madicineTabBtn').on('show.bs.tab', function (e) {
-        //     loadData('madicine', url);
-        // });
-        // $('#batchMadicineTabBtn').on('show.bs.tab', function (e) {
-        //     loadData('batchMadicine', url);
-        // });
+        // Initial load for Medicine
+        loadDatabaseRecord(
+            '/admin/pharmacy/madicine/list?type=madicine', // Added ?type=madicine
+            'madicine',
+            [
+                { data: 'no' },
+                { data: 'supplier_name' },
+                { data: 'category_name' },
+                { data: 'brand_name' },
+                { data: 'generic_name' },
+                { data: 'hsn_code' },
+                { data: 'min_reorder_level' },
+                { data: 'action' }
+            ],
+            '#madicineTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editMadicineModal',
+            '#showMadicineModal'
+        );
+
+        // Tab Switch for Batch Medicine
+        $(document).on('show.bs.tab', '#batchMadicineTabBtn', function (e) {
+            loadDatabaseRecord(
+                '/admin/pharmacy/madicine/list?type=batchMadicine', // Added ?type=batchMadicine
+                'batchMadicine',
+                [
+                    { data: 'no' },
+                    { data: 'supplier_name' },
+                    { data: 'generic_name' },
+                    { data: 'batch_number' },
+                    { data: 'mfg_date' },
+                    { data: 'expiry_date' },
+                    { data: 'action' }
+                ],
+                '#batchMadicineTable',
+                editRecord,
+                deleteRecord,
+                showRecord,
+                '#editBatchMadicineModal',
+                '#showBatchMadicineModal'
+            );
+        });
+
+        $(document).on('show.bs.tab', '#madicineTabBtn', function (e) {
+            loadDatabaseRecord(
+                '/admin/pharmacy/madicine/list?type=madicine', // Added ?type=madicine
+                'madicine',
+                [
+                    { data: 'no' },
+                    { data: 'supplier_name' },
+                    { data: 'category_name' },
+                    { data: 'brand_name' },
+                    { data: 'generic_name' },
+                    { data: 'hsn_code' },
+                    { data: 'min_reorder_level' },
+                    { data: 'action' }
+                ],
+                '#madicineTable',
+                editRecord,
+                deleteRecord,
+                showRecord,
+                '#editMadicineModal',
+                '#showMadicineModal'
+            );
+        });
+
+
+
 
         loadPage("{{ route('pharmacy.madicine') }}");
         $(document).off('click', '#addMadicine').on('click', '#addMadicine', function(e){

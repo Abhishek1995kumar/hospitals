@@ -81,7 +81,6 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
         Route::get('module', [RolePermissionController::class, 'getModule'])->name('module.get');
     });
 
-
     Route::group(['prefix' => 'plans', 'middleware' => 'permission:plan.view'], function () {
         Route::get('/', [FeaturePlanController::class, 'index'])->name('plan.index');
         Route::get('/list', [FeaturePlanController::class, 'list'])->name('plan.list');
@@ -92,6 +91,7 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
 
     Route::group(['prefix' => 'customer', 'middleware' => 'permission:customer.view'], function () {
         Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
+        Route::get('/list', [CustomerController::class, 'list'])->name('customer.list');
         Route::get('/create', [CustomerController::class, 'create'])->name('customer.create');
         Route::get('/state/{country_id}', [CustomerController::class, 'getStates'])->name('customer.state');
         Route::get('/city/{state_id}', [CustomerController::class, 'getCities'])->name('customer.city');
@@ -153,6 +153,7 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
 
         Route::group(['prefix' => 'madicine'], function () {
             Route::get('/', [PharmacyController::class, 'madicine'])->name('pharmacy.madicine');
+            Route::get('/list', [PharmacyController::class, 'list'])->name('pharmacy.madicine.list');
             Route::get('/create', [PharmacyController::class, 'madicineCreate'])->name('pharmacy.madicine.create');
             Route::get('/save', [PharmacyController::class, 'madicineSave'])->name('pharmacy.madicine.save');
             Route::get('batch/create', [PharmacyController::class, 'batchCreate'])->name('pharmacy.madicine.batch.create');

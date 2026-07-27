@@ -10,7 +10,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" href="{{asset('assets/media/logos/logos.png')}}" />
+    <link rel="shortcut icon" href="#" /> <!--logo--->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
     <link href="{{ asset('backend/plugins/custom/datatables/datatables.bundle.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('backend/plugins/global/plugins.bundle.css')}}" rel="stylesheet" type="text/css" />
@@ -994,7 +994,7 @@
                 <div id="kt_header" class="header align-items-stretch">
                     <div class="header-brand">
                         <a href="#" class="d-flex align-items-center gap-5" id="kt_header_logo">
-                            <img alt="Logo" src="{{asset('assets/media/logos/logos.png')}}" style="height: 50px;" />
+                            <img alt="Logo" src="#" style="height: 50px;" /> <!--logo image set here-->
                             <span style="font-size: 30px; color: white; font-weight: 500; "></span>
                         </a>
                         <div id="kt_aside_toggle" class="btn btn-icon w-auto px-0 btn-active-color-primary aside-minimize" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="aside-minimize">
@@ -1080,7 +1080,7 @@
                                                 <div class="menu-item px-3">
                                                     <div class="menu-content d-flex align-items-center px-3">
                                                         <div class="symbol symbol-50px me-5">
-                                                            <img alt="Logo" src="" onerror="this.onerror=null;this.src='/assets/media/blank.png'" />
+                                                            <img alt="Logo" src="" onerror="this.onerror=null;this.src='/backend/images/blank.png'" />
                                                         </div>
                                                         <div class="d-flex flex-column">
                                                             <div class="fw-bold d-flex align-items-center fs-5"> {{ authUser()->user_name ?? null }} </div>

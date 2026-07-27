@@ -137,6 +137,17 @@ if (!function_exists('panNumber')) {
 }
 
 
+if (!function_exists('hsnNumber')) { // hsn - Harmonized System of Nomenclature
+    function hsnNumber($value) {
+        $pattern = '/^(\d{6}|\d{8}|\d{10})$/';
+        if(trim(preg_match($pattern, ((string) $value), $matchs))) {
+            return strtoupper($matchs[0]);
+        }
+        return false;
+    }
+}
+
+
 
 if (!function_exists('permissionSlug')) {
     function permissionSlug($value): string {
