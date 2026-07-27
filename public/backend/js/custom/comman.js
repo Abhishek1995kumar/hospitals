@@ -28,21 +28,18 @@
                                         class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 editBtn" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="${editModalId}" 
-                                        data-id="${record.id}" 
-                                        data-name="${record.name}"
+                                        data-id="${record.id}"
                                         data-modal="${editModalId}">
                                         ✏️
                                     </button>
                                     <button type="button" 
                                         class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 deleteBtn" 
-                                        data-id="${record.id}" 
-                                        data-name="${record.name}">
+                                        data-id="${record.id}">
                                         🗑️
                                     </button>
                                     <button type="button" 
                                         class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 showBtn" 
-                                        data-id="${record.id}" 
-                                        data-name="${record.name}"
+                                        data-id="${record.id}"
                                         data-modal="${showModalId}">
                                         👁️
                                     </button>
@@ -124,7 +121,7 @@
 // Accept Only String function start
     const stringValidation = (event) => {
         const input = event.target;
-        console.log(`Input field: ${input.placeholder || input.name}`, `Value: ${input.value}`);
+        // console.log(`Input field: ${input.placeholder || input.name}`, `Value: ${input.value}`);
         const value = input.value;
         const regex = /^[a-zA-Z][a-zA-Z0-9\s.,-]*$/;
         if (!regex.test(value)) {
@@ -136,7 +133,7 @@
                 confirmButtonText: 'OK'
             });
         } else {
-            console.log(`Valid input for ${input.placeholder || input.name}: ${input.value}`);
+            // console.log(`Valid input for ${input.placeholder || input.name}: ${input.value}`);
         }
     };   
 
@@ -144,8 +141,7 @@
 // flatpickr calendar function start
     const openFlatpickr = (event) => {
         let input = event.target;
-        // Agar user ne flatpickr dwara banaye gaye visual input par click kiya hai
-        // toh hum log uske original input ko target karenge:
+        // Agar user ne flatpickr dwara banaye gaye visual input par click kiya hai, toh hum log uske original input ko target karenge:
         if (input._flatpickr) {
             input._flatpickr.open();
             return;
@@ -191,18 +187,18 @@
             };
         } else if (blockNextDateArrays.includes(input.id)) {
             options.maxDate = 'today';
+
         } else if (blockBackDateArrays.includes(input.id)) {
             options.minDate = 'today';
-        } else {
-            // Agar koi unknown field id aati hai toh initialize na karein
+
+        } else { // Agar koi unknown field id aati hai toh initialize na karein
             return;
         }
 
-        // Flatpickr ko properly assign karke open karein
-        let fpInstance = flatpickr(input, options);
+        let fpInstance = flatpickr(input, options); // Flatpickr ko properly assign karke open karein
         
-        // Auto-open calendar
-        if (fpInstance) {
+        
+        if (fpInstance) { // Auto-open calendar
             fpInstance.open();
         }
     };

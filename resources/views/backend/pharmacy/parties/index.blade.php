@@ -111,6 +111,51 @@
 @section('scripts')
     <script src="{{ asset('backend/js/custom/comman.js') }}"></script>
     <script>
+        // Initial load for Medicine
+        loadDatabaseRecord(
+            '/admin/customer', // Added ?type=madicine
+            'madicine',
+            [
+                { data: 'no' },
+                { data: 'supplier_name' },
+                { data: 'category_name' },
+                { data: 'brand_name' },
+                { data: 'generic_name' },
+                { data: 'hsn_code' },
+                { data: 'min_reorder_level' },
+                { data: 'action' }
+            ],
+            '#madicineTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editMadicineModal',
+            '#showMadicineModal'
+        );
+
+        // Tab Switch for Batch Medicine
+        $(document).on('show.bs.tab', '#partyTabBtn', function (e) {
+            loadDatabaseRecord(
+                '/admin/customer/',
+                'batchMadicine',
+                [
+                    { data: 'no' },
+                    { data: 'supplier_name' },
+                    { data: 'generic_name' },
+                    { data: 'batch_number' },
+                    { data: 'mfg_date' },
+                    { data: 'expiry_date' },
+                    { data: 'action' }
+                ],
+                '#batchMadicineTable',
+                editRecord,
+                deleteRecord,
+                showRecord,
+                '#editBatchMadicineModal',
+                '#showBatchMadicineModal'
+            );
+        });
+
         loadPage("{{ route('pharmacy.parties') }}");
         $(document).off('click', '#addPharmacyCustomer').on('click', '#addPharmacyCustomer', function(e){
             e.preventDefault();

@@ -35,6 +35,7 @@
                                     <div class="form-group">
                                         <label class="required fs-6 fw-semibold mb-2">{{ __('Medicine')}}</label>
                                         <select name="medicine_id" id="medicine_id" class="form-select search" data-control="select2" data-placeholder="Select medicine" >
+                                            <option selected disabled >{{ __('Select Pharmacy Supplier')}}</option>
                                             @if($medicines)
                                                 @foreach($medicines as $id => $medicine)
                                                     <option value="{{ $id }}">{{ $medicine }}</option> 
@@ -49,6 +50,7 @@
                                     <div class="form-group">
                                         <label class="required fs-6 fw-semibold mb-2">{{ __('Vendor')}}</label>
                                         <select name="vendor_id" id="vendor_id" class="form-select search" data-control="select2" data-placeholder="Select vendor" >
+                                            <option selected disabled >{{ __('Select Pharmacy Supplier')}}</option>
                                             @if($vendors)
                                                 @foreach($vendors as $id => $vendor)
                                                     <option value="{{ $id }}">{{ $vendor }}</option> 

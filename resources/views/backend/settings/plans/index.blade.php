@@ -441,6 +441,8 @@
             loadData('planFeature', url);
         });
 
+        
+
         $('#addPlanFeatureMapping').on('shown.bs.modal', function () {
             $(this).find('.search').select2({
                 dropdownParent: $(this)
