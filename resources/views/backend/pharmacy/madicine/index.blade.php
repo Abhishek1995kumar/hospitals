@@ -185,26 +185,28 @@
     <script src="{{ asset('backend/js/custom/comman.js') }}"></script>
     <script>
         // Initial load for Medicine
-        loadDatabaseRecord(
-            '/admin/pharmacy/madicine/list?type=madicine', // Added ?type=madicine
-            'madicine',
-            [
-                { data: 'no' },
-                { data: 'supplier_name' },
-                { data: 'category_name' },
-                { data: 'brand_name' },
-                { data: 'generic_name' },
-                { data: 'hsn_code' },
-                { data: 'min_reorder_level' },
-                { data: 'action' }
-            ],
-            '#madicineTable',
-            editRecord,
-            deleteRecord,
-            showRecord,
-            '#editMadicineModal',
-            '#showMadicineModal'
-        );
+        $(document).ready(function() {
+            loadDatabaseRecord(
+                '/admin/pharmacy/madicine/list?type=madicine', // Added ?type=madicine
+                'madicine',
+                [
+                    { data: 'no' },
+                    { data: 'supplier_name' },
+                    { data: 'category_name' },
+                    { data: 'brand_name' },
+                    { data: 'generic_name' },
+                    { data: 'hsn_code' },
+                    { data: 'min_reorder_level' },
+                    { data: 'action' }
+                ],
+                '#madicineTable',
+                editRecord,
+                deleteRecord,
+                showRecord,
+                '#editMadicineModal',
+                '#showMadicineModal'
+            );
+        });
 
         // Tab Switch for Batch Medicine
         $(document).on('show.bs.tab', '#batchMadicineTabBtn', function (e) {

@@ -18,6 +18,15 @@ use App\Http\Controllers\backend\RolePermissionController;
 
 use App\Http\Controllers\frontend\FrontendController;
 
+use Illuminate\Support\Facades\Mail;
+
+// Route::get('/mail-test', function () {
+//     Mail::raw('Testing mail', function ($message) {
+//         $message->to('archanakumari1257635@gmail.com')->subject('Testing');
+//     });
+//     return 'Done';
+// });
+
 // Blade 
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/', [FrontendController::class, 'index']);
@@ -55,6 +64,8 @@ Route::group(['middleware' => 'guest'], function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('auth', [AuthController::class, 'auth'])->name('auth');
 
+    Route::post('subscription', [AuthController::class, 'subscription'])->name('subscription.expired');
+
 });
 
 
@@ -72,10 +83,8 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
         Route::post('save', [RolePermissionController::class, 'roleSave'])->name('authentication.save');
         Route::post('permission/save', [RolePermissionController::class, 'permissionSave'])->name('permission.save');
         Route::post('role-permission/save', [RolePermissionController::class, 'rolePermissionSave'])->name('authentication.permission.save');
-    });
-
-    Route::group(['prefix' => 'module', 'middleware' => 'permission:modules.view'], function () {
-        Route::post('save', [RolePermissionController::class, 'saveModule'])->name('module.save');
+        
+        Route::post('module/save', [RolePermissionController::class, 'saveModule'])->name('module.save');
         Route::post('child/module/save', [RolePermissionController::class, 'saveChileModule'])->name('child.module.save');
         Route::get('child/{parent_id}', [RolePermissionController::class, 'childModule'])->name('child.module.get');
         Route::get('module', [RolePermissionController::class, 'getModule'])->name('module.get');
@@ -187,13 +196,6 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
 
 // React js
 use Inertia\Inertia;
-Route::get('/react', function () {
-    return Inertia::render('Home', [
-        'message' => 'Welcome to Hospital Management System',
-        'name' => 'Abhishek',
-        'age' => 25,
-    ]);
-});
-
+Route::get('/react', function () {return Inertia::render('Home', ['message' => 'Welcome to Hospital Management System','name' => 'Abhishek','age' => 25,]);});
 
 

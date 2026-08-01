@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () { $this->comment(Inspiring::quote()); })->purpose('Display an inspiring quote');
 
-Schedule::command('customer:reminder')->dailyAt("19:15")->timezone('Asia/Kolkata');
+Schedule::command('customer:reminder')->dailyAt("10:00")->timezone('Asia/Kolkata');
+Schedule::command('customer:inactive')->dailyAt("10:00")->timezone('Asia/Kolkata');
 
 
 

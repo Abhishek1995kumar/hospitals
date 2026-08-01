@@ -53,7 +53,7 @@
                     @permission('customer.view')
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="customerTabBtn" data-bs-toggle="tab" data-bs-target="#customerTab" type="button" role="tab">
-                            <i class="bi bi-speedometer2 me-1"></i> {{ __('Customer Dashboard') }}
+                            <i class="bi bi-speedometer2 me-1"></i> {{ __('Customers') }}
                         </button>
                     </li>
                     @endpermission
@@ -72,7 +72,7 @@
                     {{-- New Section: Plan & Subscription Details --}}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="subscriptionTabBtn" data-bs-toggle="tab" data-bs-target="#subscriptionTab" type="button" role="tab">
-                            <i class="bi bi-card-checklist me-1"></i> {{ __('Plan & Subscription') }}
+                            <i class="bi bi-card-checklist me-1"></i> {{ __('Subscription') }}
                         </button>
                     </li>
                     {{-- New Section: Billing & Invoices History --}}
@@ -81,6 +81,24 @@
                             <i class="bi bi-receipt me-1"></i> {{ __('Billing & Invoices') }}
                         </button>
                     </li>
+                    @if(authUser()->customer_id != '' || authUser()->customer_id != null)
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{{ asset('backend/documents/customer/customer_ui.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                                <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                            </a>
+                        </li>
+                    @else
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{{ asset('backend/documents/customer/customer_ui.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                                <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="documentationTabBtn" href="{{ asset('backend/documents/customer/customer_dev.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                                <i class="fas fa-book-open"></i> {{ __('Developer Guide')}}
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
 
@@ -138,7 +156,7 @@
                                 <tbody class="fw-semibold text-gray-600">
                                     @if(empty(authUser()->customer_id))
                                         <script>
-                                            // $(document).ready(function() {
+                                            $(document).on('show.bs.tab', '#customerTabBtn', function (e) {
                                                 loadDatabaseRecord(
                                                     '/admin/customer/list?type=customer',
                                                     'customer',
@@ -160,11 +178,11 @@
                                                     '#editCustomerModal',
                                                     '#showCustomerModal'
                                                 );
-                                            // })
+                                            })
                                         </script>
                                     @else
                                         <script>
-                                            // $(document).ready(function() {
+                                            $(document).on('show.bs.tab', '#customerTabBtn', function (e) {
                                                 loadDatabaseRecord(
                                                     '/admin/customer/list?type=customer',
                                                     'customer',
@@ -185,7 +203,110 @@
                                                     '#editCustomerModal',
                                                     '#showCustomerModal'
                                                 );
-                                            // })
+                                            })
+                                        </script>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="hospitalTab" role="tabpanel">
+                        <div class="card-header border-0 pt-6">
+                            <div class="card-title">
+                                <div class="d-flex align-items-center position-relative my-1">
+                                    <span class="svg-icon svg-icon-1 position-absolute ms-6">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="currentColor" />
+                                            <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search role" />
+                                </div>
+                            </div>
+                            <div class="card-toolbar">
+                                <div class="card-toolbar">
+                                    <a href="javascript:void(0)" class="btn btn-primary mx-3" id="addHospitals" data-url="{{ route('customer.create') }}">
+                                        {{ __('Add Hospital') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive">
+                            <table class="table align-middle table-row-dashed fs-6 gy-5 kt_table" id="hospitalTable">
+                                <thead>
+                                    @if(empty(authUser()->customer_id))
+                                        <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="text-center">{{ __('Sr No.')}}</th>
+                                            <th class="text-center">{{ __('Customer')}}</th>
+                                            <th class="text-center">{{ __('Hospital')}}</th>
+                                            <th class="text-center">{{ __('Address')}}</th>
+                                            <th class="text-center">{{ __('Status')}}</th>
+                                            <th class="text-center">{{ __('Action')}}</th>
+                                        </tr>
+                                    @else
+                                        <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="text-center">{{ __('Sr No.')}}</th>
+                                            <th class="text-center">{{ __('Customer')}}</th>
+                                            <th class="text-center">{{ __('Hospital')}}</th>
+                                            <th class="text-center">{{ __('License No')}}</th>
+                                            <th class="text-center">{{ __('Registration No')}}</th>
+                                            <th class="text-center">{{ __('Expiry Date')}}</th>
+                                            <th class="text-center">{{ __('Address')}}</th>
+                                            <th class="text-center">{{ __('Status')}}</th>
+                                            <th class="text-center">{{ __('Action')}}</th>
+                                        </tr>
+                                    @endif
+                                </thead>
+                                <tbody class="fw-semibold text-gray-600">
+                                    @if(empty(authUser()->customer_id))
+                                        <script>
+                                            $(document).on('show.bs.tab', '#hospitalTabBtn', function (e) {
+                                                loadDatabaseRecord(
+                                                    '/admin/customer/list?type=hospital',
+                                                    'hospital',
+                                                    [         
+                                                        { data:'no' },
+                                                        { data:'customer_name' },
+                                                        { data:'hospital_name' },
+                                                        { data:'firm_address' },
+                                                        { data:'hospital_type' },
+                                                        { data:'action' }
+                                                    ],
+                                                    '#hospitalTable',
+                                                    editRecord,
+                                                    deleteRecord,
+                                                    showRecord,
+                                                    '#editHospitalModal',
+                                                    '#showHospitalModal'
+                                                );
+                                            })
+                                        </script>
+                                    @else
+                                        <script>
+                                            $(document).on('show.bs.tab', '#hospitalTabBtn', function (e) {
+                                                loadDatabaseRecord(
+                                                    '/admin/customer/list?type=hospital',
+                                                    'hospital',
+                                                    [     
+                                                        { data:'no' },
+                                                        { data:'customer_name' },
+                                                        { data:'hospital_name' },
+                                                        { data:'license_no' },
+                                                        { data:'registration_no' },
+                                                        { data:'license_expiry_date' },
+                                                        { data:'firm_address' },
+                                                        { data:'hospital_type' },
+                                                        { data:'action' }
+                                                    ],
+                                                    '#hospitalTable',
+                                                    editRecord,
+                                                    deleteRecord,
+                                                    showRecord,
+                                                    '#editHospitalModal',
+                                                    '#showHospitalModal'
+                                                );
+                                            })
                                         </script>
                                     @endif
                                 </tbody>
@@ -308,65 +429,84 @@
                         <div class="card-body table-responsive">
                             <table class="table align-middle table-row-dashed fs-6 gy-5 kt_table" id="userTable">
                                 <thead>
-                                    <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                        <th class="text-center">{{ __('Sr No.')}}</th>
-                                        <th class="text-center">{{ __('Name')}}</th>
-                                        <th class="text-center">{{ __('Contact')}}</th>
-                                        <th class="text-center">{{ __('Email')}}</th>
-                                        <th class="text-center">{{ __('Firm')}}</th>
-                                        <th class="text-center">{{ __('Employees')}}</th>
-                                        <th class="text-center">{{ __('Hospital')}}</th>
-                                        <th class="text-center">{{ __('Action')}}</th>
-                                    </tr>
+                                    @if(empty(authUser()->customer_id))
+                                        <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="text-center">{{ __('Sr No.')}}</th>
+                                            <th class="text-center">{{ __('Customer')}}</th>
+                                            <th class="text-center">{{ __('Hospital')}}</th>
+                                            <th class="text-center">{{ __('Firm')}}</th>
+                                            <th class="text-center">{{ __('Employee')}}</th>
+                                            <th class="text-center">{{ __('Status')}}</th>
+                                            <th class="text-center">{{ __('Action')}}</th>
+                                        </tr>
+                                    @else
+                                        <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="text-center">{{ __('Sr No.')}}</th>
+                                            <th class="text-center">{{ __('Hospital')}}</th>
+                                            <th class="text-center">{{ __('Firm')}}</th>
+                                            <th class="text-center">{{ __('Employee')}}</th>
+                                            <th class="text-center">{{ __('Hospital Type')}}</th>
+                                            <th class="text-center">{{ __('Employee Type')}}</th>
+                                            <th class="text-center">{{ __('Status')}}</th>
+                                            <th class="text-center">{{ __('Action')}}</th>
+                                        </tr>
+                                    @endif
                                 </thead>
                                 <tbody class="fw-semibold text-gray-600">
-
+                                    @if(empty(authUser()->customer_id))
+                                        <script>
+                                            $(document).on('show.bs.tab', '#userTabBtn', function (e) {
+                                                loadDatabaseRecord(
+                                                    '/admin/customer/list?type=user',
+                                                    'user',
+                                                    [         
+                                                        { data:'no' },
+                                                        { data:'customer_name' },
+                                                        { data:'hospital_name' },
+                                                        { data:'firm_name' },
+                                                        { data:'user_name' },
+                                                        { data:'user_type' },
+                                                        { data:'action' }
+                                                    ],
+                                                    '#userTable',
+                                                    editRecord,
+                                                    deleteRecord,
+                                                    showRecord,
+                                                    '#editUserModal',
+                                                    '#showUserModal'
+                                                );
+                                            })
+                                        </script>
+                                    @else
+                                        <script>
+                                            $(document).on('show.bs.tab', '#userTabBtn', function (e) {
+                                                loadDatabaseRecord(
+                                                    '/admin/customer/list?type=user',
+                                                    'user',
+                                                    [
+                                                        { data:'no' },
+                                                        { data:'hospital_name' },
+                                                        { data:'firm_name' },
+                                                        { data:'user_name' },
+                                                        { data:'hospital_type' },
+                                                        { data:'user_type' },
+                                                        { data:'user_status' },
+                                                        { data:'action' }
+                                                    ],
+                                                    '#userTable',
+                                                    editRecord,
+                                                    deleteRecord,
+                                                    showRecord,
+                                                    '#editUserModal',
+                                                    '#showUserModal'
+                                                );
+                                            })
+                                        </script>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
                     </div> 
-
-                    <div class="tab-pane fade" id="hospitalTab" role="tabpanel">
-                        <div class="card-header border-0 pt-6">
-                            <div class="card-title">
-                                <div class="d-flex align-items-center position-relative my-1">
-                                    <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="currentColor" />
-                                            <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search role" />
-                                </div>
-                            </div>
-                            <div class="card-toolbar">
-                                <div class="card-toolbar">
-                                    <a href="javascript:void(0)" class="btn btn-primary mx-3" id="addHospitals" data-url="{{ route('customer.create') }}">
-                                        {{ __('Add Hospital') }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5 kt_table" id="hospitalTable">
-                                <thead>
-                                    <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                        <th class="text-center">{{ __('Sr No.')}}</th>
-                                        <th class="text-center">{{ __('Name')}}</th>
-                                        <th class="text-center">{{ __('Contact')}}</th>
-                                        <th class="text-center">{{ __('Email')}}</th>
-                                        <th class="text-center">{{ __('Firm')}}</th>
-                                        <th class="text-center">{{ __('Employees')}}</th>
-                                        <th class="text-center">{{ __('Hospital')}}</th>
-                                        <th class="text-center">{{ __('Action')}}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="fw-semibold text-gray-600">
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
                     <div class="tab-pane fade" id="billingTab" role="tabpanel">
                         <div class="card-header border-0 pt-6">
@@ -385,23 +525,84 @@
                         <div class="card-body table-responsive">
                             <table class="table align-middle table-row-dashed fs-6 gy-5 kt_table" id="billingTable">
                                 <thead>
-                                    <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                        <th class="text-center">{{ __('Sr No.')}}</th>
-                                        <th class="text-center">{{ __('Name')}}</th>
-                                        <th class="text-center">{{ __('Contact')}}</th>
-                                        <th class="text-center">{{ __('Email')}}</th>
-                                        <th class="text-center">{{ __('Firm')}}</th>
-                                        <th class="text-center">{{ __('Employees')}}</th>
-                                        <th class="text-center">{{ __('Hospital')}}</th>
-                                        <th class="text-center">{{ __('Action')}}</th>
-                                    </tr>
+                                    @if(empty(authUser()->customer_id))
+                                        <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="text-center">{{ __('Sr No.')}}</th>
+                                            <th class="text-center">{{ __('Plan')}}</th>
+                                            <th class="text-center">{{ __('Start Date')}}</th>
+                                            <th class="text-center">{{ __('End Date')}}</th>
+                                            <th class="text-center">{{ __('Payment')}}</th>
+                                            <th class="text-center">{{ __('Status')}}</th>
+                                        </tr>
+                                    @else
+                                        <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="text-center">{{ __('Sr No.')}}</th>
+                                            <th class="text-center">{{ __('Plan')}}</th>
+                                            <th class="text-center">{{ __('Amount')}}</th>
+                                            <th class="text-center">{{ __('Invoice')}}</th>
+                                            <th class="text-center">{{ __('Transaction')}}</th>
+                                            <th class="text-center">{{ __('Start Date')}}</th>
+                                            <th class="text-center">{{ __('End Date')}}</th>
+                                            <th class="text-center">{{ __('Payment')}}</th>
+                                            <th class="text-center">{{ __('Status')}}</th>
+                                        </tr>
+                                    @endif
                                 </thead>
-                                <tbody class="fw-semibold text-gray-600">
-
+                                <tbody class="fw-semibold text-gray-600"> 
+                                    @if(empty(authUser()->customer_id))
+                                        <script>
+                                            $(document).on('show.bs.tab', '#billingTabBtn', function (e) {
+                                                loadDatabaseRecord(
+                                                    '/admin/customer/list?type=billing',
+                                                    'billing',
+                                                    [
+                                                        { data: 'no' },
+                                                        { data: 'plan_name' },
+                                                        { data: 'start_date' },
+                                                        { data: 'end_date' },
+                                                        { data: 'gateway_name' },
+                                                        { data: 'status_text' },
+                                                    ],
+                                                    '#billingTable',
+                                                    editRecord,
+                                                    deleteRecord,
+                                                    showRecord,
+                                                    '#editBillingModal',
+                                                    '#showBillingModal'
+                                                );
+                                            });
+                                        </script>
+                                    @else 
+                                        <script>
+                                            $(document).on('show.bs.tab', '#billingTabBtn', function (e) {
+                                                loadDatabaseRecord(
+                                                    '/admin/customer/list?type=billing',
+                                                    'billing',
+                                                    [
+                                                        { data: 'no' },
+                                                        { data: 'plan_name' },
+                                                        { data: 'amount' },
+                                                        { data: 'invoice_no' },
+                                                        { data: 'transaction_id' },
+                                                        { data: 'start_date' },
+                                                        { data: 'end_date' },
+                                                        { data: 'gateway_name' },
+                                                        { data: 'status_text' },
+                                                    ],
+                                                    '#billingTable',
+                                                    editRecord,
+                                                    deleteRecord,
+                                                    showRecord,
+                                                    '#editBillingModal',
+                                                    '#showBillingModal'
+                                                );
+                                            });
+                                        </script>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
-                    </div>   
+                    </div>
                 </div>
             </div>
         </div>
@@ -412,76 +613,29 @@
 @section('scripts')
     <script src="{{ asset('backend/js/custom/comman.js') }}"></script>
     <script>
-        // Tab Switch for Batch Medicine
-        $(document).on('show.bs.tab', '#hospitalTabBtn', function (e) {
+        $(document).ready(function() {
             loadDatabaseRecord(
-                '/admin/customer/list?type=hospital',
-                'hospital',
+                '/admin/customer/list?type=customer',
+                'customer',
                 [
-                    { data: 'no' },
-                    { data: 'supplier_name' },
-                    { data: 'generic_name' },
-                    { data: 'batch_number' },
-                    { data: 'mfg_date' },
-                    { data: 'expiry_date' },
-                    { data: 'action' }
+                    { data:'no' },
+                    { data:'customer_name' },
+                    { data:'plan_name' },
+                    { data:'plan_features' },
+                    { data:'subscription_start_date' },
+                    { data:'subscription_end_date' },
+                    { data:'plan_price' },
+                    { data:'payment_status' },
+                    { data:'action' }
                 ],
-                '#hospitalTable',
+                '#customerTable',
                 editRecord,
                 deleteRecord,
                 showRecord,
-                '#editHospitalModal',
-                '#showHospitalModal'
+                '#editCustomerModal',
+                '#showCustomerModal'
             );
-        });
-
-        // Tab Switch for Batch Medicine
-        $(document).on('show.bs.tab', '#billingTabBtn', function (e) {
-            loadDatabaseRecord(
-                '/admin/customer/list?type=billing',
-                'billing',
-                [
-                    { data: 'no' },
-                    { data: 'supplier_name' },
-                    { data: 'generic_name' },
-                    { data: 'batch_number' },
-                    { data: 'mfg_date' },
-                    { data: 'expiry_date' },
-                    { data: 'action' }
-                ],
-                '#billingTable',
-                editRecord,
-                deleteRecord,
-                showRecord,
-                '#editBillingModal',
-                '#showBillingModal'
-            );
-        });
-
-        // Tab Switch for Employee
-        $(document).on('show.bs.tab', '#userTabBtn', function (e) {
-            loadDatabaseRecord(
-                '/admin/customer/list?type=user',
-                'user',
-                [
-                    { data: 'no' },
-                    { data: 'supplier_name' },
-                    { data: 'generic_name' },
-                    { data: 'batch_number' },
-                    { data: 'mfg_date' },
-                    { data: 'expiry_date' },
-                    { data: 'action' }
-                ],
-                '#userTable',
-                editRecord,
-                deleteRecord,
-                showRecord,
-                '#editUserModal',
-                '#showUserModal'
-            );
-        });
-
-
+        })
 
 
         loadPage("{{ route('customer.index') }}");
@@ -517,3 +671,6 @@
         }));
     </script>
 @endsection
+
+
+

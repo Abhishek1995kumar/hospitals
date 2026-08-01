@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\backend;
 
 use Throwable;
-use App\Traits\QueryTrait;
 use Illuminate\Http\Request;
 use App\Traits\ValidationTrait;
+use App\Traits\DatabaseQueryTrait;
 use App\Traits\CommanFunctionTrait;
 use App\Http\Controllers\Controller;
 use App\Services\RegistrationService;
 
 class AuthController extends Controller {
-    use ValidationTrait, CommanFunctionTrait, QueryTrait;
+    use ValidationTrait, CommanFunctionTrait, DatabaseQueryTrait;
     public function login() {
         return view("backend.auth.login");
     }
@@ -47,5 +47,9 @@ class AuthController extends Controller {
     public function forgetPassword(Request $request) {
         // Placeholder for password reset logic
         return json_response(true, 200, 'Reset instructions sent if email exists.');
+    }
+
+    public function subscription(Request $request) {
+        return view('subscription.expired');
     }
 }

@@ -10,16 +10,12 @@ use Illuminate\Support\Facades\Mail;
 use App\Services\SubscriptionReminderService;
 
 
-class CustomerSubscriptionReminder extends Command {
-    protected $signature = 'customer:reminder';
-    protected $description = 'Send subscription expiry reminder emails';
-
+class CustomerInactive extends Command {
+    protected $signature = 'customer:inactive';
+    protected $description = 'Customer subscription expiried';
 
     public function handle(SubscriptionReminderService $reminderService) {
-        $customers = $reminderService->sendEmailReminder();
+        $customers = $reminderService->updateCustomerService();
         return Command::SUCCESS;
-
     }
-
 }
-

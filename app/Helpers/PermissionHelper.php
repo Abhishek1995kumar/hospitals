@@ -69,38 +69,28 @@ class PermissionHelper {
                             ->leftJoin('plans as p', 'p.id', '=', 'c.current_plan_id')
                             // Latest active subscription ke liye subquery se join karein taaki duplicate records na banein
                             ->leftJoin('customer_subscriptions as cs', function($join) {
-                                $join->on('cs.customer_id', '=', 'c.id')
-                                    ->where('cs.status', '=', 1);
+                                $join->on('cs.customer_id', '=', 'c.id')->where('cs.status', '=', 1);
                             })
                             ->leftJoin('hospitals as h', function($join) {
-                                $join->on('h.id', '=', 'u.hospital_id')
-                                    ->on('h.customer_id', '=', 'u.customer_id');
+                                $join->on('h.id', '=', 'u.hospital_id')->on('h.customer_id', '=', 'u.customer_id');
                             })
                             ->leftJoin('firms as f', function($join) {
-                                $join->on('f.id', '=', 'u.firm_id')
-                                    ->on('f.hospital_id', '=', 'h.id')
-                                    ->on('f.customer_id', '=', 'c.id');
+                                $join->on('f.id', '=', 'u.firm_id')->on('f.hospital_id', '=', 'h.id')->on('f.customer_id', '=', 'c.id');
                             })
                             ->where('u.id', $result->id)
                             ->select(
                                 'u.id', 'u.customer_id', 'u.hospital_id', 'u.firm_id', 'u.user_id', 'u.is_system', 'u.email', 'u.phone', 'u.user_type',
                                 DB::raw("CONCAT(u.fname, ' ', u.lname) AS user_name"),
-                                // Multiple roles ke liye Group Concat (Comma separated milega: e.g. "Admin, Doctor")
                                 DB::raw("GROUP_CONCAT(r.name) as role_names"),
                                 DB::raw("GROUP_CONCAT(r.code) as role_codes"),
                                 DB::raw("MAX(r.is_full_access) as is_full_access"),
-
                                 'c.customer_name', 'c.max_hospitals', 'c.max_users', 'c.max_firms', 
                                 'c.subscription_status', 'c.last_payment_date', 'c.next_billing_date', 'c.logo as customer_logo',
-                                
                                 'cs.invoice_no', 'cs.transaction_id', 'cs.amount', 'cs.start_date', 'cs.end_date', 'cs.payment_gateway', 'cs.payment_status',
-                                
                                 'p.plan_name', 'p.duration_days',
-                                
                                 'h.name as hospital_name', 'h.registration_no', 'h.license_no', 'h.hospital_id as hospital_slug', 
                                 'h.phone as hospital_number', 'h.total_beds', 'h.total_icu_beds', 'h.total_operation_theatres', 
                                 'h.total_ambulances', 'h.total_wards', 'h.logo as hospital_logo', 'h.opening_time', 'h.closing_time',
-                                
                                 'f.name as firm_name', 'f.firm_id', 'f.address as firm_address'
                             )
                             ->groupBy(

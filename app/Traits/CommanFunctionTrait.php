@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Session;
 
 trait CommanFunctionTrait {
     public function loginTrait($data) {
-        try {
+        // try {
             $loginInput = trim($data['login']);
             $encryptedLogin = secure($loginInput, 'E');
             $result = User::where(function ($query) use ($loginInput, $encryptedLogin) {
@@ -34,11 +34,9 @@ trait CommanFunctionTrait {
                 if ($result->status == 1 && $result->deleted_at == null){
                     if(Hash::check($data['password'], $result->password)){
                         Auth::login($result);
-                        
                         request()->session()->regenerate();
                         $userData = PermissionHelper::afterLoginGenerateAuthUserSession($result);
                         session(['user_auth_data' => $userData]);
-
                         storeLog("User Login", request()->except(['password', 'password_confirmation']));
                         return json_response(true,200,'Login Success');
                         
@@ -54,9 +52,9 @@ trait CommanFunctionTrait {
                 return json_response(false, 404, 'Details not found');
                 
             }
-        } catch (Exception $e) { 
-            return json_response(false, 422, $e->getMessage());
-        }
+        // } catch (Exception $e) { 
+        //     return json_response(false, 422, $e->getMessage());
+        // }
     }
 
 

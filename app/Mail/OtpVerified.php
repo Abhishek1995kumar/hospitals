@@ -3,12 +3,12 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class OtpVerified extends Mailable {
     use Queueable, SerializesModels;
@@ -17,15 +17,13 @@ class OtpVerified extends Mailable {
         $this->data = $data;
     }
 
-    public function envelope(): Envelope
-    {
+    public function envelope(): Envelope {
         return new Envelope(
             subject: 'Otp Verified'
         );
     }
 
-    public function content(): Content
-    {
+    public function content(): Content {
         return new Content(
             view: 'backend.emails.otp',
             with: [
@@ -34,8 +32,8 @@ class OtpVerified extends Mailable {
         );
     }
 
-    public function attachments(): array
-    {
+    public function attachments(): array {
         return [];
     }
+
 }
