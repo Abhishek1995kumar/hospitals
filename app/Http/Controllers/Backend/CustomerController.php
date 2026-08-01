@@ -2,26 +2,41 @@
 
 namespace App\Http\Controllers\backend;
 
-
 use Carbon\Carbon;
-use App\Models\User;
+
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+
+use App\Models\User;
+use App\Jobs\SendMailJob;
 use App\Models\Backend\Role;
 use App\Traits\ValidationTrait;
 use App\Models\Backend\Customer;
 use App\Models\Backend\Hospital;
-use App\Jobs\SendWelcomeEmailJob;
+use App\Traits\DatabaseQueryTrait;
 use App\Models\Backend\Department;
 use App\Mail\CustomerRegisterMail;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Models\Backend\Subscription;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Backend\Subscription;
 use App\Services\CustomerRegistrationService;
+use App\Console\Commands\CustomerSubscriptionReminder;
+
+
 
 class CustomerController extends Controller {
-    use ValidationTrait;
+    use ValidationTrait, DatabaseQueryTrait;
+    protected CustomerSubscriptionReminder $subscriptionService;
+    protected CustomerRegistrationService $registrationService;
+
+    public function __construct(CustomerSubscriptionReminder $subscriptionService, CustomerRegistrationService $registrationService) {
+        $this->subscriptionService = $subscriptionService;
+        $this->registrationService = $registrationService;
+
+    }
+
     public function index(Request $request) {
         if ($request->ajax()) {
             $view = view('backend.customer.index');
@@ -57,7 +72,7 @@ class CustomerController extends Controller {
     }
 
 
-    public function save(Request $request, CustomerRegistrationService $registrationService) {
+    public function saveFromSuperAdminPanel(Request $request) {
         try {
             $data = $request->all();
             $validation = $this->validationCustomerTait($data);
@@ -65,8 +80,8 @@ class CustomerController extends Controller {
                 return json_response(false, 410, "Validation failed", $validation);
             }
 
-            $customerData = $registrationService->register($data); // Register Customer via Service
-            SendWelcomeEmailJob::dispatch(
+            $customerData = $this->registrationService->register($data); // Register Customer via Service
+            SendMailJob::dispatch(
                 $customerData['email'],
                 [
                     'name'     => $customerData['name'],
@@ -90,8 +105,6 @@ class CustomerController extends Controller {
     }
 
 
-
-
     public function list(Request $request) {
         try {
             $customerId = authUser()->customer_id;
@@ -99,141 +112,23 @@ class CustomerController extends Controller {
             $data = [];
             switch ($type) {
                 case 'customer':
-                    if(empty(authUser()->customer_id)) {
-                        $superAdminQuerys = DB::select("SELECT 
-                            c.id AS customer_table_id, c.customer_name, c.email, c.mobile_no, c.subscription_status, c.trial_end_date, 
-                            DATE_FORMAT(c.subscription_start_date, '%d %M %Y') AS sub_start_date, 
-                            DATE_FORMAT(c.subscription_end_date, '%d %M %Y') AS sub_end_date, 
-                            p.plan_name, p.price AS plan_price,
-                            cs.invoice_no, cs.transaction_id, cs.amount AS paid_amount, 
-                            CASE cs.payment_status
-                                WHEN 1 THEN 'Razorpay'
-                                WHEN 2 THEN 'Stripe'
-                                WHEN 3 THEN 'Cash'
-                                WHEN 4 THEN 'Bank Transfer'
-                                ELSE 'Mango Pay'
-                            END AS payment_status,
-                            GROUP_CONCAT(DISTINCT f.feature_name SEPARATOR ', ') AS plan_features
-                            FROM customers c
-                            JOIN plans p ON p.id = c.current_plan_id
-                            JOIN customer_subscriptions cs ON cs.customer_id = c.id AND cs.status = 1
-                            LEFT JOIN feature_plans fp ON fp.plan_id = p.id
-                            LEFT JOIN features f ON f.id = fp.feature_id AND f.status = 1
-                            WHERE c.status = 1
-                            GROUP BY c.id, cs.id;
-                        ");
-                        $data = array_map(function($query) {
-                                    return [
-                                        'customer_table_id'         => $query->customer_table_id,
-                                        'customer_name'             => $query->customer_name,
-                                        'email'                     => secure($query->email, 'D'),
-                                        'mobile_no'                 => secure($query->mobile_no, 'D'),
-                                        'plan_name'                 => $query->plan_name,
-                                        'subscription_status'       => $query->subscription_status,
-                                        'trial_end_date'            => $query->trial_end_date,
-                                        'subscription_start_date'   => $query->sub_start_date,
-                                        'subscription_end_date'     => $query->sub_end_date,
-                                        'plan_price'                => $query->plan_price,
-                                        'invoice_no'                => $query->invoice_no,
-                                        'transaction_id'            => $query->transaction_id,
-                                        'paid_amount'               => $query->paid_amount,
-                                        'payment_status'            => $query->payment_status,
-                                        'plan_features'             => $query->plan_features ?? '--',
-                                    ];
-                            }, $superAdminQuerys
-                        );
-                    } else {
-                        $customerQuerys = DB::select("SELECT c.id AS customer_table_id, c.customer_name, c.mobile_no, c.max_hospitals, c.max_users, c.max_firms, 
-                                            C.subscription_status, 
-                                            DATE_FORMAT(c.subscription_start_date, '%d %M %Y') AS sub_start_date, 
-                                            DATE_FORMAT(c.subscription_end_date, '%d %M %Y') AS sub_end_date, 
-                                            p.id AS plan_id, p.plan_name, p.duration_days, m.name AS module_name, GROUP_CONCAT(DISTINCT f.feature_name SEPARATOR ', ') AS plan_features
-                                            FROM customers c 
-                                            JOIN plans p ON p.id = c.current_plan_id 
-                                            LEFT JOIN feature_plans fp ON fp.plan_id = p.id 
-                                            LEFT JOIN features f ON f.id = fp.feature_id 
-                                            LEFT JOIN modules m ON m.id = f.module_id 
-                                            WHERE c.id=$customerId AND c.status=1 AND c.subscription_status=1
-                                            GROUP BY c.id, p.id, f.id; -- Active Subscription
-                        ");
-                        $data = array_map(function($query) {
-                                return [
-                                    'customer_table_id'         => $query->customer_table_id,
-                                    'customer_name'             => $query->customer_name,
-                                    'mobile_no'                 => secure($query->mobile_no, 'D'),
-                                    'plan_name'                 => $query->plan_name,
-                                    'subscription_status'       => $query->subscription_status,
-                                    'subscription_start_date'   => $query->sub_start_date,
-                                    'subscription_end_date'     => $query->sub_end_date,
-                                    'plan_features'             => $query->plan_features ?? '--',
-                                ];
-                            }, $customerQuerys
-                        );
-                    }
+                    $data = $this->customerListTrait();
                     break;
 
                 case 'hospital':
-                    $data = DB::select('SELECT * FROM customers');
+                    $data = $this->customerHospitalListTrait();
                     break;
                     
                 case 'subscription':
-                    if(empty($customerId)) {
-                        $expireSubscriptionAlert = DB::select("SELECT 
-                                        c.id AS customer_id,
-                                        c.customer_name,
-                                        c.mobile_no,
-                                        c.subscription_end_date,
-                                        DATEDIFF(c.subscription_end_date, CURDATE()) AS days_left,
-                                        p.plan_name
-                                    FROM customers c
-                                    JOIN plans p ON p.id = c.current_plan_id
-                                    WHERE c.subscription_status = 1 
-                                    AND c.subscription_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY);
-                        ");
-                        $data = array_map(function($query) {
-                                    return [
-                                        'customer_id'               => $query->customer_id,
-                                        'customer_name'             => $query->customer_name,
-                                        'mobile_no'                 => secure($query->mobile_no, 'D'),
-                                        'plan_name'                 => $query->plan_name,
-                                        'subscription_end_date'     => $query->subscription_end_date,
-                                        'days_left'                 => $query->days_left,
-                                    ];
-                            }, $expireSubscriptionAlert
-                        );
-                        
-                    } else {
-                        $activeSubscriptionCustomer = "SELECT cs.id AS subscription_id, cs.invoice_no, cs.transaction_id,
-                                                cs.amount, cs.start_date, cs.end_date, p.plan_name,
-                                                CASE cs.payment_gateway
-                                                    WHEN 1 THEN 'Razorpay'
-                                                    WHEN 2 THEN 'Stripe'
-                                                    WHEN 3 THEN 'Cash'
-                                                    WHEN 4 THEN 'Bank Transfer'
-                                                    WHEN 5 THEN 'Mango Pay'
-                                                END AS gateway_name,
-                                                CASE cs.payment_status
-                                                    WHEN 1 THEN 'Success'
-                                                    WHEN 2 THEN 'Pending'
-                                                    WHEN 3 THEN 'Failed'
-                                                END AS status_text,
-                                                cs.status AS is_current_plan
-                                            FROM customer_subscriptions cs
-                                            JOIN plans p ON p.id = cs.plan_id
-                                            WHERE cs.customer_id=? -- Specific Customer ID
-                                            ORDER BY cs.id DESC;
-                        ";
-                        $data = DB::select($activeSubscriptionCustomer, [$customerId]);
-                    }
+                    $data = $this->customerSubscriptionListTrait();
                     break;
 
-
                 case 'billing':
-                    $data = $query([authUser()->customer_id]);
+                    $data = $this->customerBillingInvoiceListTrait();
                     break;
 
                 case 'user':
-                    $data = DB::select('SELECT * FROM customers');
+                    $data = $this->customerEmployeeListTrait();
                     break;
                 
                 default:
@@ -250,4 +145,6 @@ class CustomerController extends Controller {
             return json_response(false, 500, "Something went wrong: " . $th->getMessage());
         }
     }
+
+
 }

@@ -2,36 +2,33 @@
 
 namespace App\Http\Controllers\backend;
 
+
 use Throwable;
-use App\Traits\QueryTrait;
-use App\Models\Backend\Role;
-use Illuminate\Http\Request;
-use App\Models\Backend\Module;
+
+use App\Traits\DatabaseQueryTrait;
 use App\Traits\ValidationTrait;
+
+use App\Models\Backend\Role;
+use App\Models\Backend\Module;
 use App\Models\Backend\Permission;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use App\Models\Backend\RolePermission;
 
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+
+
 class RolePermissionController extends Controller {
-    use ValidationTrait, QueryTrait;
+    use ValidationTrait, DatabaseQueryTrait;
+
     public function index() {
         try {
             $user = auth()->user();
-            $modules = DB::table('modules')
-                        ->where('status', 1)
-                        ->whereNull('parent_id')
-                        ->orderBy('name')
-                        ->select('name', 'id')
-                        ->get();
-        
-            $loggedInRoles = DB::table('user_roles')
-                                ->join('roles', 'roles.id', '=', 'user_roles.role_id')
-                                ->join('users', 'users.id', '=', 'user_roles.user_id')
-                                ->where('user_roles.user_id', $user->id)
-                                ->select('roles.id', 'roles.code', 'roles.is_system', 'roles.scope', 'roles.customer_id', 'roles.hospital_id', 'roles.firm_id', 'roles.is_full_access', 'users.user_type')
-                                ->get();
+            $modules = $this->authModuleListTrait();
+            $loggedInRoles = $this->loggedInRolesTrait($user);
             if ($loggedInRoles->isEmpty()) {
                 return redirect()->back()->with('error', 'Aapko koi role assigned nahi hai.');
             }
@@ -40,10 +37,10 @@ class RolePermissionController extends Controller {
             $roles = ['system' => collect(), 'customer' => collect()];
             $permissions = ['system' => collect(), 'customer' => collect()];
             $users = ['system' => collect(), 'customer' => collect()];
-
-            $roleCodes = $loggedInRoles->pluck('code')->toArray(); // Saare assigned roles ke codes aur flags nikalen
+            $roleCodes = $loggedInRoles->pluck('code')->toArray();          // Saare assigned roles ke codes aur flags nikalen
+            $userCustomerId = $user->customer_id;                           // Pata karna hai ki user System (Project Owner) ka hai ya Client (Customer) ka Hum user ke tables ke static customer_id par trust karenge taaki cross-access na ho
             
-            $userCustomerId = $user->customer_id;  // Shart 4 & 5: Pata karein ki user System (Project Owner) ka hai ya Client (Customer) ka Hum user ke tables ke static customer_id par trust karenge taaki cross-access na ho
+            
             // SCENARIO A: User System/Project Owner ki Company ka hai
             if (empty($userCustomerId)) {
                 $status = 1;
@@ -58,12 +55,8 @@ class RolePermissionController extends Controller {
                     $binding[] = 'super_admin';
                 }
                 $roles['system'] = DB::select($query, $binding);
-                $systemPerms = DB::table('permissions')
-                                ->leftJoin('modules', 'modules.id', '=', 'permissions.module_id')
-                                ->where('permissions.status', 1)
-                                ->select('permissions.id', 'modules.name as module_name', 'permissions.name')
-                                ->get();
-                $permissions['system'] = $systemPerms->groupBy('module_name');
+                $systemPerms = $this->permissionTrait();
+                $permissions['system'] = $systemPerms->groupBy('modules_name');
                 
                 // System Users (Sirf project owner ki company ke log)
                 $systemUser = DB::table('users')
@@ -75,34 +68,27 @@ class RolePermissionController extends Controller {
                     $systemUser->where('user_type', '!=', 1);
                 }
                 $users['system'] = $systemUser->get();
+
+                
             } 
             
             // SCENARIO B: User kisi Client/Customer (Tenant) ka employee hai
             else {
-                // Shart 2 & 3: Ek customer ka employee apne hi customer_id ka data dekhega. Agar uske multiple roles hain (Hospital A aur Hospital B ke), toh hum un saare hospitals ki IDs nikalenge.
-                $hospitalIds = $loggedInRoles->pluck('hospital_id')->filter()->unique();
-                $firmIds = $loggedInRoles->pluck('firm_id')->filter()->unique();
+                $hospitalIds = $loggedInRoles->pluck('hospital_id')->filter()->unique(); // Ek customer ka employee apne hi customer_id ka data dekhega. Agar uske multiple roles hain (Hospital A aur Hospital B ke), toh hum un saare hospitals ki IDs nikalenge.
+                $firmIds = $loggedInRoles->pluck('firm_id')->filter()->unique();         // Ek customer ka employee apne hi customer_id ka data dekhega. Agar uske multiple roles hain (Hospital A aur Hospital B ke), toh hum un saare hospitals ki IDs nikalenge.
 
-                $customerQuery = DB::table('roles')
-                            ->select('id', 'name', 'is_full_access')
-                            ->where('status', 1)
-                            ->where('is_system', 1)
-                            ->where('scope', 1)
-                            ->where('customer_id', $userCustomerId); // Strictly locked to his own customer
+                $customerQuery = $this->customerRoleTrait($userCustomerId); // Strictly locked to his own customer
 
-                // Shart 3: Agar user 'customer_admin' hai, toh usko pure customer/client ke saare hospitals ka access do. Agar customer_admin nahi hai, toh sirf unhi hospitals/firms ka data dikhao jinka use role mila hua hai.
-                if (!in_array('customer_admin', $roleCodes)) {
+                if (!in_array('customer_admin', $roleCodes)) { // Agar user 'customer_admin' hai, toh usko pure customer/client ke saare hospitals ka access do. Agar customer_admin nahi hai, toh sirf unhi hospitals/firms ka data dikhao jinka use role mila hua hai.
                     $customerQuery->where('code', '!=', 'customer_admin')
                         ->whereIn('hospital_id', $hospitalIds)
                         ->whereIn('firm_id', $firmIds);
                 }
+
                 $roles['customer'] = $customerQuery->get();
 
                 // Customer Users (Sirf isi customer ke employees)
-                $customerUsersQuery = DB::table('users')
-                    ->select('id', 'fname', 'lname', 'user_type')
-                    ->where('status', 1)
-                    ->where('customer_id', $userCustomerId);
+                $customerUsersQuery = $this->customerUserListTrait($userCustomerId);
                 
                 // Agar employee pure customer ka admin nahi hai, toh users list bhi wahi dikhao jo uske mapped hospitals mein hain
                 if (!in_array('customer_admin', $roleCodes)) {
@@ -131,21 +117,15 @@ class RolePermissionController extends Controller {
             if (!$request->filled('type')) {
                 return json_response(false, 400, 'List type is required');
             }
-            
             $user = auth()->user();
-            
-            // 1. Logged-in user ke saare roles fetch karein (Collection milega)
-            $loggedInRoles = DB::table('user_roles')
-                            ->join('roles', 'roles.id', '=', 'user_roles.role_id')
-                            ->where('user_roles.user_id', $user->id)
-                            ->select('roles.code', 'roles.is_system', 'roles.scope', 'roles.customer_id', 'roles.hospital_id', 'roles.firm_id')
-                            ->get();
+
+            $loggedInRoles = $this->loggedInRolesTrait($user); // Logged-in user ke saare roles fetch karein (Collection milega)
 
             if ($loggedInRoles->isEmpty()) {
                 return json_response(false, 403, 'Aapko koi role assigned nahi hai.');
             }
 
-            $roleCodes = $loggedInRoles->pluck('code')->toArray(); // 2. Flags aur IDs nikalen multiple roles ko handle karne ke liye
+            $roleCodes = $loggedInRoles->pluck('code')->toArray(); // Flags aur IDs nikalen multiple roles ko handle karne ke liye
             
             // Check karein kya user ke paas system role hai ya customer role
             $isSystemUser = $loggedInRoles->where('is_system', 0)->where('scope', 0)->isNotEmpty();
@@ -162,101 +142,67 @@ class RolePermissionController extends Controller {
             switch ($request->type) {
                 case 'role':
                     if ($isSystemUser) {
-                        $system = DB::table('roles')
-                            ->select('id', 'name', 'code', 'is_system', 'scope', 'customer_id', 'hospital_id', 'firm_id', 'role_priority')
-                            ->where('status', 1)
-                            ->where('is_system', 0)
-                            ->where('scope', 0);
-
-                        // Agar roles mein 'super_admin' nahi hai, toh super_admin role hide kar do
-                        if (!in_array('super_admin', $roleCodes)) {
+                        $system = $this->roleTrait();
+                        if (!in_array('super_admin', $roleCodes)) { // Agar roles mein 'super_admin' nahi hai, toh super_admin role hide kar do
                             $system->where('code', '!=', 'super_admin');
                         }
-                        $data['system'] = $system->get();
+                        $system = $system->get();
+                        $data = $system;
 
                     } elseif ($isCustomerUser) {
-                        $customer = DB::table('roles')
-                            ->select('id', 'name', 'code', 'is_system', 'scope', 'customer_id', 'hospital_id', 'firm_id', 'role_priority')
-                            ->where('status', 1)
-                            ->where('is_system', 1)
-                            ->where('scope', 1)
-                            ->where('customer_id', $customerId);
-
-                        // Agar user 'customer_admin' NAHI hai, toh sirf uske assigned hospitals/firms ke roles dikhao
-                        if (!in_array('customer_admin', $roleCodes)) {
+                        $customer = $this->customerRoleTrait($customerId);
+                        if (!in_array('customer_admin', $roleCodes)) {  
                             $customer->whereIn('hospital_id', $hospitalIds)
                                     ->whereIn('firm_id', $firmIds)
                                     ->where('code', '!=', 'customer_admin');
                         } 
-                        $data['customer'] = $customer->get();
+                        $customer = $customer->get();
+                        $data = $customer;
                     }
                     $message = 'Roles fetched successfully';
                     break;
 
                 case 'permission':
-                    $data['system'] = DB::table('permissions')
-                        ->leftJoin('modules', 'modules.id', '=', 'permissions.module_id')
-                        ->select('permissions.id', 'modules.name as modules_name', 'permissions.name', 'permissions.action')
-                        ->where('permissions.status', 1)
-                        ->get();
+                    $system = $this->permissionTrait();
+                    $data = $system;
                     $message = 'Permissions fetched successfully';
                     break;
 
                 case 'rolePermission':
                     if ($isSystemUser) {
-                        $data['system'] = DB::table('role_permissions')
-                                    ->leftJoin('roles', 'roles.id', '=', 'role_permissions.role_id')
-                                    ->leftJoin('permissions', 'permissions.id', '=', 'role_permissions.permission_id')
-                                    ->select('role_permissions.id', 'roles.name as role_name', 'permissions.action as permission_action', 'roles.customer_id', 'role_permissions.customer_id')
-                                    ->whereNull('role_permissions.customer_id')
-                                    ->get();
+                        $system = $this->rolePermissionTrait();
+                        dd($system);
+                        $data = $system;
                     
                     } elseif ($isCustomerUser) {
-                        $data['customer'] = DB::table('role_permissions')
-                                    ->leftJoin('roles', 'roles.id', '=', 'role_permissions.role_id')
-                                    ->leftJoin('permissions', 'permissions.id', '=', 'role_permissions.permission_id')
-                                    ->select('role_permissions.id', 'roles.name as role_name', 'permissions.action as permission_action', 'roles.customer_id', 'role_permissions.customer_id')
-                                    ->where('role_permissions.customer_id', $customerId)
-                                    ->get();
+                        $customer = $this->customerRolePermissionTrait($customerId);
+                        $data = $customer;
+
                     }
                     $message = 'Role permissions fetched successfully';
                     break;
 
                 case 'roleUser':
                     if ($isSystemUser) {
-                        $data['system'] = DB::table('user_roles')
-                                    ->leftJoin('roles', 'roles.id', '=', 'user_roles.role_id')
-                                    ->leftJoin('users', 'users.id', '=', 'user_roles.user_id')
-                                    ->select('user_roles.id', 'roles.name as role_name', 'users.fname', 'users.lname', 'user_roles.customer_id')
-                                    ->whereNull('user_roles.customer_id')
-                                    ->get();
+                        $system = $this->userRoleTrait();
+                        $data = $system;
 
                     } elseif ($isCustomerUser) {
-                        $data['customer'] = DB::table('user_roles')
-                                    ->leftJoin('roles', 'roles.id', '=', 'user_roles.role_id')
-                                    ->leftJoin('users', 'users.id', '=', 'user_roles.user_id')
-                                    ->select('user_roles.id', 'roles.name as role_name', 'users.fname', 'users.lname', 'user_roles.customer_id')
-                                    ->where('user_roles.customer_id', $customerId)
-                                    ->get();
+                        $customer = $this->customerUserRoleTrait($customerId);
+                        $data = $customer;
+
                     }
-                    
                     $message = 'User role fetched successfully';
                     break;
 
                 case 'module':
-                    $data['parentModules'] = DB::table('modules')
-                        ->where('status', 1)
-                        ->whereNull('parent_id')
-                        ->get();
-
-                case 'child-module':
-                    $data['childModules'] = DB::table('modules')
-                        ->join('modules as mp', 'mp.id', '=', 'modules.parent_id')
-                        ->where('modules.status', 1)
-                        ->whereNotNull('modules.parent_id')
-                        ->select('modules.id', 'mp.name as parent_name', 'modules.name')
-                        ->get();
+                    $parentModules = $this->moduleTrait();
+                    $data = $parentModules;
+                    break;
                     
+                case 'child-module':
+                    $childModules = $this->childModuleTrait();
+                    $data = $childModules;
                     $message = 'User role fetched successfully';
                     break;
 
@@ -264,7 +210,10 @@ class RolePermissionController extends Controller {
                     return json_response(false, 400, 'Invalid list type');
             }
             
-            return json_response(true, 200, $message, $data);
+            return response()->json([
+                'status' => true,
+                'data'   => $data
+            ], 200);
 
         } catch (\Exception $e) {
             Log::error('Permission Management Error: ' . $e->getMessage());
@@ -372,11 +321,9 @@ class RolePermissionController extends Controller {
         $customerId = auth()->user()->customer_id; // Agar system user hai to null milega, customer hai to ID milega
         $permissions = $request->input('permission_id', []); // Agar koi check nahi hai to khali array milega
 
-        // 2. Database Transaction taaki koi error aaye to data safe rahe
+        // Database Transaction taaki koi error aaye to data safe rahe
         DB::transaction(function () use ($roleId, $customerId, $permissions) {
-            
-            // PEHLE: Purani saari mappings delete karo is role ke liye
-            $deleteQuery = DB::table('role_permissions')->where('role_id', $roleId);
+            $deleteQuery = DB::table('role_permissions')->where('role_id', $roleId); // PEHLE: Purani saari mappings delete karo is role ke liye
             
             if (empty($customerId)) {
                 $deleteQuery->whereNull('customer_id');
@@ -385,8 +332,7 @@ class RolePermissionController extends Controller {
             }
             $deleteQuery->delete();
 
-            // PHIR: Agar user ne naye checkboxes select kiye hain, to unhe insert karo
-            if (!empty($permissions)) {
+            if (!empty($permissions)) { // PHIR: Agar user ne naye checkboxes select kiye hain, to unhe insert karo
                 $insertData = [];
                 foreach ($permissions as $permId) {
                     $insertData[] = [
@@ -394,7 +340,7 @@ class RolePermissionController extends Controller {
                         'role_id'       => $roleId,
                         'permission_id' => (int) $permId,
                         'created_at'    => now(), // Agar timestamps hain to
-                        'updated_at'    => now(),
+                        'updated_at'    => NULL,
                     ];
                 }
                 DB::table('role_permissions')->insert($insertData);

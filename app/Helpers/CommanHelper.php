@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Crypt;
 
+use Symfony\Component\Mime\Email;
+
+
 if (!function_exists('authUser')) {
     function authUser() {
         return session('user_auth_data');

@@ -61,9 +61,26 @@
                 </li>
                 @endpermission
 
+                @permission('permission.save')
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="permissionTabBtn" data-bs-toggle="tab" data-bs-target="#permissionTab" type="button" role="tab"> {{ __('Permission') }} </button>
+                </li>
+                @endpermission
+
+                @permission('plan.view')
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rolePermissionTabBtn" data-bs-toggle="tab" data-bs-target="#rolePermissionTab" type="button" role="tab"> {{ __('Role Permission') }} </button>
+                </li>
+                @endpermission
+
+                @permission('plan.view')
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="roleUserTabBtn" data-bs-toggle="tab" data-bs-target="#roleUserTab" type="button" role="tab"> {{ __('User Role') }} </button>
+                </li>
+                @endpermission
                 @permission('module.view')
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="moduleTabBtn" data-bs-toggle="tab" data-bs-target="#moduleTab" type="button" role="tab"> {{ __('Parent Module') }} </button>
+                    <button class="nav-link" id="moduleTabBtn" data-bs-toggle="tab" data-bs-target="#moduleTab" type="button" role="tab"> {{ __('Module') }} </button>
                 </li>
                 @endpermission
 
@@ -73,23 +90,25 @@
                 </li>
                 @endpermission
 
-                @permission('permission.save')
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="permissionTabBtn" data-bs-toggle="tab" data-bs-target="#permissionTab" type="button" role="tab"> {{ __('Permission Dashboard') }} </button>
-                </li>
-                @endpermission
 
-                @permission('plan.view')
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="rolePermissionTabBtn" data-bs-toggle="tab" data-bs-target="#rolePermissionTab" type="button" role="tab"> {{ __('Role Permission Mapping') }} </button>
-                </li>
-                @endpermission
-
-                @permission('plan.view')
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="roleUserTabBtn" data-bs-toggle="tab" data-bs-target="#roleUserTab" type="button" role="tab"> {{ __('User Role Mapping') }} </button>
-                </li>
-                @endpermission
+                @if(authUser()->customer_id != '' || authUser()->customer_id != null)
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="{{ asset('backend/documents/role/role_user.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                            <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                        </a>
+                    </li>
+                @else
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="{{ asset('backend/documents/role/role_user.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                            <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="documentationTabBtn" href="{{ asset('backend/documents/role/role_developer.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
+                            <i class="fas fa-book-open"></i> {{ __('Developer Guide')}}
+                        </a>
+                    </li>
+                @endif
             </ul>
         </div>
 
@@ -122,78 +141,6 @@
                                     <th class="text-center">{{ __('Name')}}</th>
                                     <th class="text-center">{{ __('Scope')}}</th>
                                     <th class="text-center">{{ __('Priority')}}</th>
-                                    <th class="text-center">{{ __('Action')}}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="fw-semibold text-gray-600">
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="moduleTab" role="tabpanel">
-                    <div class="card-header border-0 pt-6">
-                        <div class="card-title">
-                            <div class="d-flex align-items-center position-relative my-1">
-                                <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="currentColor" />
-                                        <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search permission" />
-                            </div>
-                        </div>
-                        <div class="card-toolbar">
-                            <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#addModule" class="btn btn-primary" id="addModuleModal" >
-                                {{ __('Add Module')}}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="moduleTable">
-                            <thead>
-                                <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="text-center">{{ __('Id')}}</th>
-                                    <th class="text-center">{{ __('Parent Module')}}</th>
-                                    <th class="text-center">{{ __('Module')}}</th>
-                                    <th class="text-center">{{ __('Action')}}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="fw-semibold text-gray-600">
-                                
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="childModuleTab" role="tabpanel">
-                    <div class="card-header border-0 pt-6">
-                        <div class="card-title">
-                            <div class="d-flex align-items-center position-relative my-1">
-                                <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="currentColor" />
-                                        <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search permission" />
-                            </div>
-                        </div>
-                        <div class="card-toolbar">
-                            <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#addChildModule" class="btn btn-primary" id="addChildModuleModal" >
-                                {{ __('Add Child Module')}}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="childModuleTable">
-                            <thead>
-                                <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="text-center">{{ __('Id')}}</th>
-                                    <th class="text-center">{{ __('Parent Module')}}</th>
-                                    <th class="text-center">{{ __('Module')}}</th>
                                     <th class="text-center">{{ __('Action')}}</th>
                                 </tr>
                             </thead>
@@ -304,6 +251,78 @@
                                     <th class="text-center min-w-125px">{{ __('Role')}}</th>
                                     <th class="text-center min-w-125px">{{ __('Employee')}}</th>
                                     <th class="text-center min-w-125px">{{ __('Action')}}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="moduleTab" role="tabpanel">
+                    <div class="card-header border-0 pt-6">
+                        <div class="card-title">
+                            <div class="d-flex align-items-center position-relative my-1">
+                                <span class="svg-icon svg-icon-1 position-absolute ms-6">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="currentColor" />
+                                        <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search permission" />
+                            </div>
+                        </div>
+                        <div class="card-toolbar">
+                            <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#addModule" class="btn btn-primary" id="addModuleModal" >
+                                {{ __('Add Module')}}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="moduleTable">
+                            <thead>
+                                <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="text-center">{{ __('Id')}}</th>
+                                    <th class="text-center">{{ __('Module')}}</th>
+                                    <th class="text-center">{{ __('Status')}}</th>
+                                    <th class="text-center">{{ __('Action')}}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-semibold text-gray-600">
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="childModuleTab" role="tabpanel">
+                    <div class="card-header border-0 pt-6">
+                        <div class="card-title">
+                            <div class="d-flex align-items-center position-relative my-1">
+                                <span class="svg-icon svg-icon-1 position-absolute ms-6">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="currentColor" />
+                                        <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search permission" />
+                            </div>
+                        </div>
+                        <div class="card-toolbar">
+                            <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#addChildModule" class="btn btn-primary" id="addChildModuleModal" >
+                                {{ __('Add Child Module')}}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="childModuleTable">
+                            <thead>
+                                <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
+                                    <th class="text-center">{{ __('Id')}}</th>
+                                    <th class="text-center">{{ __('Parent Module')}}</th>
+                                    <th class="text-center">{{ __('Module')}}</th>
+                                    <th class="text-center">{{ __('Action')}}</th>
                                 </tr>
                             </thead>
                             <tbody class="fw-semibold text-gray-600">
@@ -857,27 +876,24 @@
 <script src="{{ asset('backend/js/custom/insert.js') }}"></script>
 <script>
     $(document).ready(function() {
-        let url = '/admin/authentication/list/';
-        loadData('role', url);
-        $('#roleTabBtn').on('show.bs.tab', function (e) {
-            loadData('role', url);
-        });
-        $('#moduleTabBtn').on('show.bs.tab', function (e) {
-            loadData('module', url);
-        });
-        $('#childModuleTabBtn').on('show.bs.tab', function (e) {
-            loadData('child-module', url);
-        });
-        $('#permissionTabBtn').on('show.bs.tab', function (e) {
-            loadData('permission', url);
-        });
-        $('#rolePermissionTabBtn').on('show.bs.tab', function (e) {
-            loadData('rolePermission', url);
-        });
-        $('#roleUserTabBtn').on('show.bs.tab', function (e) {
-            loadData('roleUser', url);
-        });
-
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=role',
+            'role',
+            [
+                { data:'no' },
+                { data:'name' },
+                { data:'scope' },
+                { data:'role_priority' },
+                { data:'action' }
+            ],
+            '#roleTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editRoleModal',
+            '#showRoleModal'
+        );
+    
         $('#addRole').on('shown.bs.modal', function () {
             $(this).find('.search').select2({
                 dropdownParent: $(this)
@@ -904,6 +920,127 @@
                 dropdownParent: $(this)
             });
         });
+    });
+
+    $(document).on('shown.bs.tab', '#roleTabBtn', function (e) {
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=role',
+            'role',
+            [
+                { data:'no' },
+                { data:'name' },
+                { data:'scope' },
+                { data:'role_priority' },
+                { data:'action' }
+            ],
+            '#roleTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editRoleModal',
+            '#showRoleModal'
+        );
+    });
+
+    $(document).on('shown.bs.tab', '#permissionTabBtn', function (e) {
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=permission',
+            'permission',
+            [
+                { data:'no' },
+                { data:'modules_name' },
+                { data:'name' },
+                { data:'permission_action' },
+                { data:'action' }
+            ],
+            '#permissionTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editPermissionModal',
+            '#showPermissionModal'
+        );
+    });
+
+    $(document).on('shown.bs.tab', '#rolePermissionTabBtn', function (e) {
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=rolePermission',
+            'rolePermission',
+            [
+                { data:'no' },
+                { data:'role_name' },
+                { data:'permission_action' },
+                { data:'action' }
+            ],
+            '#rolePermissionTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editRolePermissionModal',
+            '#showRolePermissionModal'
+        );
+    });
+
+    $(document).on('shown.bs.tab', '#roleUserTabBtn', function (e) {
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=roleUser',
+            'roleUser',
+            [
+                { data:'no' },
+                { data:'hospital_name' },
+                { data:'firm_name' },
+                { data:'user_name' },
+                { data:'hospital_type' },
+                { data:'user_type' },
+                { data:'user_status' },
+                { data:'action' }
+            ],
+            '#roleUserTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editRoleUserModal',
+            '#showRoleUserModal'
+        );
+    });
+
+    $(document).on('shown.bs.tab', '#moduleTabBtn', function (e) {
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=module',
+            'module',
+            [
+                { data:'no' },
+                { data:'name' },
+                { data:'module_status' },
+                { data:'action' }
+            ],
+            '#moduleTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editModuleModal',
+            '#showModuleModal'
+        );
+    });
+
+    $(document).on('shown.bs.tab', '#childModuleTabBtn', function (e) {
+        loadDatabaseRecord(
+            '/admin/authentication/list?type=child-module',
+            'child-module',
+            [
+                { data:'no' },
+                { data:'parent_name' },
+                { data:'child_name' },
+                { data:'module_status' },
+                { data:'action' }
+            ],
+            '#childModuleTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editChildModuleModal',
+            '#showChildModuleModal'
+        );
     });
 </script>
 @endsection

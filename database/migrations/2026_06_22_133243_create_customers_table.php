@@ -18,23 +18,14 @@ return new class extends Migration {
             $table->integer('max_hospitals')->default(1);
             $table->integer('max_users')->default(50);
             $table->integer('max_firms')->default(1);
-
-            // Current Active Plan
             $table->unsignedBigInteger('current_plan_id')->nullable();
-
-            // Trial
             $table->boolean('is_trial')->default(1)->nullable();
             $table->date('trial_end_date')->nullable();
-
-            // Current Subscription
             $table->tinyInteger('subscription_status')->default(1)->comment('1=Active, 2=Expired, 3=Suspended');
             $table->date('subscription_start_date')->nullable();
             $table->date('subscription_end_date')->nullable();
-
-            // Billing
             $table->date('last_payment_date')->nullable();
             $table->date('next_billing_date')->nullable();
-
             $table->string('logo')->nullable();
             $table->text('address')->nullable();
             $table->string('city')->nullable();

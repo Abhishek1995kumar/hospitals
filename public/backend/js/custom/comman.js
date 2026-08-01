@@ -9,70 +9,123 @@
 // }
 
 // Common function to load records in a table with action buttons
+    // function loadDatabaseRecord(url, type, columns, tableId, editFn, deleteFn, showFn, editModalId = '', showModalId = '', emptyMsg = 'No records found', responseKey='data') {
     function loadDatabaseRecord(url, type, columns, tableId, editFn, deleteFn, showFn, editModalId = '', showModalId = '', emptyMsg = 'No records found') {
         $.ajax({
             url: url,
             method: 'GET',
             success: function(res) {
+                let records = [];
                 let tbody = '';
-                if (res && res.data && res.data.length > 0) {
-                    $.each(res.data, function(index, record) {
+                if (Array.isArray(res.data)) {
+                    records = res.data;
+                    $.each(records, function(index, record) {
                         tbody += '<tr>';
                         columns.forEach(function(column) {
                             if (column.data === 'no') {
                                 tbody += `<td class="text-center">${index + 1}</td>`;
 
                             } else if (column.data === 'action') {
-                                tbody += `<td class="text-center">
-                                    <button type="button" 
-                                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 editBtn" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="${editModalId}" 
-                                        data-id="${record.id}"
-                                        data-modal="${editModalId}">
-                                        ✏️
-                                    </button>
-                                    <button type="button" 
-                                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 deleteBtn" 
-                                        data-id="${record.id}">
-                                        🗑️
-                                    </button>
-                                    <button type="button" 
-                                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 showBtn" 
-                                        data-id="${record.id}"
-                                        data-modal="${showModalId}">
-                                        👁️
-                                    </button>
-                                </td>`;
+                                tbody += `
+                                    <td class="text-center">
+                                        <button type="button" 
+                                            class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 editBtn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="${editModalId}" 
+                                            data-id="${record.id}"
+                                            data-modal="${editModalId}">
+                                            ✏️
+                                        </button>
+                                        <button type="button" 
+                                            class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 deleteBtn" 
+                                            data-id="${record.id}">
+                                            🗑️
+                                        </button>
+                                        <button type="button" 
+                                            class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 showBtn" 
+                                            data-id="${record.id}"
+                                            data-modal="${showModalId}">
+                                            👁️
+                                        </button>
+
+                                    </td>
+                                `;
+
                             } else {
                                 tbody += `<td class="text-center">${record[column.data] ?? ''}</td>`;
                             }
+
                         });
+
                         tbody += '</tr>';
+
                     });
-                } else {
-                    tbody = `<tr><td colspan="${columns.length}" class="text-center">${emptyMsg}</td></tr>`;
+
+                } 
+                // else if(res.data && res.data[responseKey]) {
+                //     alert("fshkjfhjk");
+                //     records = res.data[responseKey];
+                //     $.each(records, function(index, record) {
+                //         tbody += '<tr>';
+                //         columns.forEach(function(column) {
+                //             if (column.data === 'no') {
+                //                 tbody += `<td class="text-center">${index + 1}</td>`;
+
+                //             } else if (column.data === 'action') {
+                //                 tbody += `
+                //                     <td class="text-center">
+                //                         <button type="button" 
+                //                             class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 editBtn" 
+                //                             data-bs-toggle="modal" 
+                //                             data-bs-target="${editModalId}" 
+                //                             data-id="${record.id}"
+                //                             data-modal="${editModalId}">
+                //                             ✏️
+                //                         </button>
+                //                         <button type="button" 
+                //                             class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 deleteBtn" 
+                //                             data-id="${record.id}">
+                //                             🗑️
+                //                         </button>
+                //                         <button type="button" 
+                //                             class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1 showBtn" 
+                //                             data-id="${record.id}"
+                //                             data-modal="${showModalId}">
+                //                             👁️
+                //                         </button>
+
+                //                     </td>
+                //                 `;
+
+                //             } else {
+                //                 tbody += `<td class="text-center">${record[column.data] ?? ''}</td>`;
+                //             }
+
+                //         });
+
+                //         tbody += '</tr>';
+
+                //     });
+
+                // }
+                else {
+                    tbody = `<tr>
+                                <td colspan="${columns.length}" class="text-center py-5">
+                                    <img src="/backend/images/5.png"
+                                        alt="No Record Found"
+                                        width="400"
+                                        height="200"
+                                        class="mb-3">
+                                    <p class="text-muted">${emptyMsg}</p>
+                                </td>
+                            </tr>`;
                 }
+
                 $(`${tableId} tbody`).html(tbody);
 
-                // Attach events dynamically
-                if (typeof editFn === 'function') {
-                    $(`${tableId} .editBtn`).off('click').on('click', function () {
-                        editRecord(this);
-                    });
-                }
-                if (typeof deleteFn === 'function') {
-                    $(`${tableId} .deleteBtn`).off('click').on('click', function (e) {
-                        deleteRecord(e, this);
-                    });
-                }
-                if (typeof showFn === 'function') {
-                    $(`${tableId} .showBtn`).off('click').on('click', function (e) {
-                        showRecord(e, this);
-                    });
-                }
             }
         });
+
     }
 
     function editRecord(btn){
