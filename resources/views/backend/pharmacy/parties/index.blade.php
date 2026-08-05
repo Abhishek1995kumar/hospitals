@@ -1,5 +1,5 @@
 @extends('backend.layouts.admin')
-@section('title') {{ __('Pharmacy Customer')}} @endsection
+@section('title') {{ __('Pharmacy Client')}} @endsection
 
 @section('style')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -7,7 +7,7 @@
 @endsection
 
 @section('breadcrumb')
-    <h1 class="d-flex flex-column text-dark fw-bold fs-3 mb-0">{{ __('Pharmacy Customers')}}</h1>
+    <h1 class="d-flex flex-column text-dark fw-bold fs-3 mb-0">{{ __('Pharmacy Client')}}</h1>
     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 pt-1">
         <li class="breadcrumb-item text-muted">
             <a href="{{ url('admin/dashboard') }}" class="text-muted text-hover-primary">{{ __('Dashboard')}}</a>
@@ -15,7 +15,7 @@
         <li class="breadcrumb-item">
             <span class="bullet bg-gray-200 w-5px h-2px"></span>
         </li>
-        <li class="breadcrumb-item text-dark">{{ __('Pharmacy Customer')}}</li>
+        <li class="breadcrumb-item text-dark">{{ __('Pharmacy Client')}}</li>
     </ul>
 @endsection
 
@@ -40,7 +40,7 @@
         <div class="row">
             <div class="col-3">
                 <div class="alert alert-success text-center border border-success">
-                    <h5 class="alert-heading">{{ __('Total Pharmacy Customer')}}</h5>
+                    <h5 class="alert-heading">{{ __('Total Pharmacy Client')}}</h5>
                     <p class="mb-0" id="completeValue"></p>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                 <ul class="nav nav-tabs" id="partyTabMenu" role="tablist">
                     @permission('authentication.view')
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="partyTabBtn" data-bs-toggle="tab" data-bs-target="#partyTab" type="button" role="tab"> {{ __('Customer Dashboard') }} </button>
+                        <button class="nav-link active" id="partyTabBtn" data-bs-toggle="tab" data-bs-target="#partyTab" type="button" role="tab"> {{ __('Pharmacy Client') }} </button>
                     </li>
                     @endpermission
                 </ul>
@@ -74,7 +74,7 @@
                             </div>
                             <div class="card-toolbar">
                                 <button type="button" class="btn btn-primary mx-2" id="addPharmacyCustomer" data-url="{{ route('pharmacy.parties.create') }}">
-                                    {{ __('Add Pharmacy Customer')}}
+                                    {{ __('Add Pharmacy Client')}}
                                 </button>
                                 <button type="button" class="btn btn-secondary " id="export">
                                     {{ __('Export')}}
@@ -85,14 +85,20 @@
                             </div>
                         </div>
                         <div class="card-body table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="partyTable">
+                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="clientTable">
                                 <thead>
                                     <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                         <th class="text-center">{{ __('Id')}}</th>
-                                        <th class="text-center">{{ __('Name')}}</th>
-                                        <th class="text-center">{{ __('Scope')}}</th>
-                                        <th class="text-center">{{ __('Priority')}}</th>
-                                        <th class="text-center">{{ __('Action')}}</th>
+                                        <th class="text-center">{{ __('Customer')}}</th>
+                                        <th class="text-center">{{ __('Hospital')}}</th>
+                                        <th class="text-center">{{ __('Company')}}</th>
+                                        <th class="text-center">{{ __('GST NO')}}</th>
+                                        <th class="text-center">{{ __('Pan No')}}</th>
+                                        <th class="text-center">{{ __('Limit')}}</th>
+                                        <th class="text-center">{{ __('Doctor')}}</th>
+                                        <th class="text-center">{{ __('Balance')}}</th>
+                                        <th class="text-center">{{ __('Type')}}</th>
+                                        <th style="width:20rem" class="text-center">{{ __('Action')}}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="fw-semibold text-gray-600">
@@ -112,47 +118,30 @@
     <script src="{{ asset('backend/js/custom/comman.js') }}"></script>
     <script>
         // Initial load for Medicine
-        loadDatabaseRecord(
-            '/admin/customer', // Added ?type=madicine
-            'madicine',
-            [
-                { data: 'no' },
-                { data: 'supplier_name' },
-                { data: 'category_name' },
-                { data: 'brand_name' },
-                { data: 'generic_name' },
-                { data: 'hsn_code' },
-                { data: 'min_reorder_level' },
-                { data: 'action' }
-            ],
-            '#madicineTable',
-            editRecord,
-            deleteRecord,
-            showRecord,
-            '#editMadicineModal',
-            '#showMadicineModal'
-        );
-
-        // Tab Switch for Batch Medicine
-        $(document).on('show.bs.tab', '#partyTabBtn', function (e) {
+        $(document).ready(function() {
             loadDatabaseRecord(
-                '/admin/customer/',
-                'batchMadicine',
+                '/admin/pharmacy/parties/list?type=client', // Added ?type=madicine
+                'client',
                 [
                     { data: 'no' },
-                    { data: 'supplier_name' },
-                    { data: 'generic_name' },
-                    { data: 'batch_number' },
-                    { data: 'mfg_date' },
-                    { data: 'expiry_date' },
+                    { data: 'customer_name' ?? '-'},
+                    { data: 'hospital_name' ?? '-' },
+                    { data: 'company_name' },
+                    { data: 'client_name' },
+                    { data: 'client_gst_no' },
+                    { data: 'client_pan_no' },
+                    { data: 'credit_limit' },
+                    { data: 'doctor_name' },
+                    { data: 'opening_balance' },
+                    { data: 'balance_type' },
                     { data: 'action' }
                 ],
-                '#batchMadicineTable',
+                '#clientTable',
                 editRecord,
                 deleteRecord,
                 showRecord,
-                '#editBatchMadicineModal',
-                '#showBatchMadicineModal'
+                '#editClientModal',
+                '#showClientModal'
             );
         });
 

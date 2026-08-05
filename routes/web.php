@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Mail;
 //     return 'Done';
 // });
 
-// Blade 
+// Frontend side url start
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/', [FrontendController::class, 'index']);
     Route::get('doctors', [FrontendController::class, 'doctors']);
@@ -67,15 +67,18 @@ Route::group(['middleware' => 'guest'], function () {
     Route::post('subscription', [AuthController::class, 'subscription'])->name('subscription.expired');
 
 });
+// Frontend side url end
 
 
 
-
+// Backend side url start
 Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/notify', [NotificationController::class, 'send'])->name('notify');
     Route::get('/export/{type?}', [ExcelController::class, 'export'])->name('admin.export');
+
+
 
     Route::group(['prefix' => 'authentication', 'middleware' => 'permission:authentication.view'], function () {
         Route::get('/', [RolePermissionController::class, 'index'])->name('authentication.index');
@@ -90,6 +93,8 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
         Route::get('module', [RolePermissionController::class, 'getModule'])->name('module.get');
     });
 
+
+
     Route::group(['prefix' => 'plans', 'middleware' => 'permission:plan.view'], function () {
         Route::get('/', [FeaturePlanController::class, 'index'])->name('plan.index');
         Route::get('/list', [FeaturePlanController::class, 'list'])->name('plan.list');
@@ -98,54 +103,47 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
         Route::post('plan-feature/save', [FeaturePlanController::class, 'planFeatureMapping'])->name('plan.feature.mapping.save');
     });
 
+
+
     Route::group(['prefix' => 'customer', 'middleware' => 'permission:customer.view'], function () {
         Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
         Route::get('/list', [CustomerController::class, 'list'])->name('customer.list');
+        
         Route::get('/create', [CustomerController::class, 'create'])->name('customer.create');
+        Route::post('/save', [CustomerController::class, 'save'])->name('customer.save');
+        
+        Route::get('/employee/create', [CustomerController::class, 'employeeCreate'])->name('customer.employee.create');
+        Route::post('/employee/save', [CustomerController::class, 'employeeSave'])->name('customer.employee.save');
+        
         Route::get('/state/{country_id}', [CustomerController::class, 'getStates'])->name('customer.state');
         Route::get('/city/{state_id}', [CustomerController::class, 'getCities'])->name('customer.city');
-        Route::post('/save', [CustomerController::class, 'save'])->name('customer.save');
     });
 
-    
+
+
     Route::group(['prefix' => 'hospitals', 'middleware' => 'permission:hospital.view'], function () {
         Route::get('/', [HospitalController::class, 'index'])->name('hospital.index');
         Route::get('list', [HospitalController::class, 'list'])->name('hospital.list');
     });
 
 
+
     Route::group(['prefix' => 'departments', 'middleware' => 'permission:department.view'], function () {
         Route::get('/', [DepartmentController::class, 'index'])->name('department.index');
         Route::get('list', [DepartmentController::class, 'list'])->name('department.list');
+        Route::get('parent/save', [DepartmentController::class, 'parentSave'])->name('department.parent.save');
+        Route::get('child/save', [DepartmentController::class, 'childSave'])->name('department.child.save');
     });
 
-
-    Route::group(['prefix' => 'subscriptions', 'middleware' => 'permission:subscription.view'], function () {
-        Route::get('/', [SubscriptionController::class, 'index'])->name('subscription.index');
-        Route::get('list', [SubscriptionController::class, 'list'])->name('subscription.list');
-    });
-
-
-    Route::group(['prefix' => 'maintenances', 'middleware' => 'permission:maintenance.view'], function () {
-        Route::get('/', [MaintenanceController::class, 'index'])->name('maintenance.index');
-        Route::post('/route', [MaintenanceController::class, 'route'])->name('maintenance.route');
-        Route::post('/cache', [MaintenanceController::class, 'cache'])->name('maintenance.cache');
-        Route::post('/config', [MaintenanceController::class, 'config'])->name('maintenance.config');
-        Route::post('/optimize', [MaintenanceController::class, 'optimizer'])->name('maintenance.optimize');
-    });
-
-
-    Route::group(['prefix' => 'subscription'], function () {
-        Route::get('/', [MaintenanceController::class, 'subscription'])->name('subscription.expired');
-    });
 
 
     Route::group(['prefix' => 'pharmacy'], function () {
         Route::group(['prefix' => 'parties'], function () {
+            Route::get('/list', [PharmacyController::class, 'list'])->name('pharmacy.parties.list');
+
             Route::get('/', [PharmacyController::class, 'parties'])->name('pharmacy.parties');
             Route::get('/create', [PharmacyController::class, 'partyCreate'])->name('pharmacy.parties.create');
             Route::post('/save', [PharmacyController::class, 'partySave'])->name('pharmacy.parties.save');
-            
         });
 
         Route::group(['prefix' => 'supplier'], function () {
@@ -189,8 +187,73 @@ Route::group(['middleware' => ['auth', 'subscription'], 'prefix' => 'admin'], fu
             Route::get('/', [PharmacyController::class, 'report'])->name('pharmacy.report');
         });
     });
-});
 
+
+
+    Route::group(['prefix' => 'payroll'], function () {
+        Route::group(['prefix' => 'attendance'], function () {
+            Route::get('/list', [PharmacyController::class, 'list'])->name('payroll.attendance.list');
+
+            Route::get('/', [PharmacyController::class, 'parties'])->name('payroll.attendance');
+            Route::get('/create', [PharmacyController::class, 'partyCreate'])->name('payroll.attendance.create');
+            Route::post('/save', [PharmacyController::class, 'partySave'])->name('payroll.attendance.save');
+        });
+
+        Route::group(['prefix' => 'leave'], function () {
+            Route::get('/', [PharmacyController::class, 'supplier'])->name('payroll.leave');
+            Route::get('/create', [PharmacyController::class, 'supplierCreate'])->name('payroll.leave.create');
+            Route::post('/save', [PharmacyController::class, 'supplierSave'])->name('payroll.leave.save');
+        });
+            
+        Route::group(['prefix' => 'shift'], function () {
+            Route::get('/', [PharmacyController::class, 'vendor'])->name('payroll.shift');
+            Route::get('/create', [PharmacyController::class, 'vendorCreate'])->name('payroll.shift.create');
+            Route::post('/save', [PharmacyController::class, 'vendorSave'])->name('payroll.shift.save');
+        });
+
+        Route::group(['prefix' => 'ticket'], function () {
+            Route::get('/', [PharmacyController::class, 'madicine'])->name('payroll.ticket');
+            Route::get('/list', [PharmacyController::class, 'list'])->name('payroll.ticket.list');
+            Route::get('/create', [PharmacyController::class, 'madicineCreate'])->name('payroll.ticket.create');
+            Route::get('/save', [PharmacyController::class, 'madicineSave'])->name('payroll.ticket.save');
+            Route::get('batch/create', [PharmacyController::class, 'batchCreate'])->name('payroll.ticket.batch.create');
+            Route::get('batch/save', [PharmacyController::class, 'batchSave'])->name('payroll.ticket.batch.save');
+        });
+
+        Route::group(['prefix' => 'meeting'], function () {
+            Route::get('/', [PharmacyController::class, 'inventory'])->name('payroll.meeting');
+        });
+
+        Route::group(['prefix' => 'payslip'], function () {
+            Route::get('/', [PharmacyController::class, 'purchase'])->name('payroll.payslip');
+        });
+    });
+
+
+
+    Route::group(['prefix' => 'subscriptions', 'middleware' => 'permission:subscription.view'], function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('subscription.index');
+        Route::get('list', [SubscriptionController::class, 'list'])->name('subscription.list');
+    });
+
+
+
+    Route::group(['prefix' => 'maintenances', 'middleware' => 'permission:maintenance.view'], function () {
+        Route::get('/', [MaintenanceController::class, 'index'])->name('maintenance.index');
+        Route::post('/route', [MaintenanceController::class, 'route'])->name('maintenance.route');
+        Route::post('/cache', [MaintenanceController::class, 'cache'])->name('maintenance.cache');
+        Route::post('/config', [MaintenanceController::class, 'config'])->name('maintenance.config');
+        Route::post('/optimize', [MaintenanceController::class, 'optimizer'])->name('maintenance.optimize');
+    });
+
+
+
+    Route::group(['prefix' => 'subscription'], function () {
+        Route::get('/', [MaintenanceController::class, 'subscription'])->name('subscription.expired');
+    });
+
+});
+// Backend side url end
 
 
 

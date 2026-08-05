@@ -70,10 +70,7 @@ class RolePermissionController extends Controller {
                 $users['system'] = $systemUser->get();
 
                 
-            } 
-            
-            // SCENARIO B: User kisi Client/Customer (Tenant) ka employee hai
-            else {
+            } else { // SCENARIO B: User kisi Client/Customer (Tenant) ka employee hai
                 $hospitalIds = $loggedInRoles->pluck('hospital_id')->filter()->unique(); // Ek customer ka employee apne hi customer_id ka data dekhega. Agar uske multiple roles hain (Hospital A aur Hospital B ke), toh hum un saare hospitals ki IDs nikalenge.
                 $firmIds = $loggedInRoles->pluck('firm_id')->filter()->unique();         // Ek customer ka employee apne hi customer_id ka data dekhega. Agar uske multiple roles hain (Hospital A aur Hospital B ke), toh hum un saare hospitals ki IDs nikalenge.
 

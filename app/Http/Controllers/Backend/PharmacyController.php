@@ -40,6 +40,10 @@ class PharmacyController extends Controller {
                 case 'batchMadicine':
                     $data = $this->batchMadicineListTrait();
                     break;
+
+                case 'client':
+                    $data = $this->clientListTrait();
+                    break;
                 
                 default:
                     return response()->json(['status' => false, 'message' => 'Invalid type', 'data' => []], 400);

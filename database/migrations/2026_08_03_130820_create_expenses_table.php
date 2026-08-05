@@ -6,15 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->string('department_id')->unique();
             $table->integer('customer_id')->nullable();
-            $table->integer('firm_id')->nullable();
             $table->integer('hospital_id')->nullable();
-            $table->integer('parent_id')->nullable();
-            $table->string('name');
-            $table->string('slug');
+            $table->integer('department_id')->nullable();
+            $table->integer('cost_center_id')->nullable();
+            $table->decimal('amount', 12, 2);
+            $table->string('reference_no')->nullable();
+            $table->date('expense_date');
+            $table->text('description')->nullable();
             $table->tinyInteger('status')->default(1)->comment('1=active, 0=inactive');
             $table->timestamps();
             $table->softDeletes();
@@ -23,6 +24,6 @@ return new class extends Migration {
 
 
     public function down(): void {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('expenses');
     }
 };

@@ -905,19 +905,6 @@
                                         </div>
                                     </div>
                                     @endpermission
-
-                                    @permission('hospital.view')
-                                    <div class="menu-sub menu-sub-accordion">
-                                        <div class="menu-item">
-                                            <a class="menu-link {{Request::is('admin/hospitals*') ? 'active' : ''}}" href="{{ url('admin/hospitals') }}">
-                                                <span class="menu-bullet">
-                                                    <span class="bullet bullet-dot"></span>
-                                                </span>
-                                                <span class="menu-title">{{ __('Hospitals') }}</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    @endpermission
                                     
                                     @permission('authentication.view')
                                     <div class="menu-sub menu-sub-accordion">
@@ -1208,8 +1195,10 @@
     <script src="{{asset('backend/js/widgets.bundle.js')}}"></script>
     <script src="{{asset('backend/js/custom/widgets.js')}}"></script>
     <script src="{{asset('backend/js/push.min.js')}}"></script>
+    <script src="{{asset('backend/js/custom/pages.js')}}"></script>
     <script src="{{asset('backend/js/custom/comman.js')}}"></script>
     <script src="{{asset('backend/js/custom/insert.js')}}"></script>
+    <script src="{{asset('backend/js/custom/validation.js')}}"></script>
     <script>
         // Loader -->
         // Show loader when the page starts loading

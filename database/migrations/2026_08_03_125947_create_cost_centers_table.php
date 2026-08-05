@@ -6,14 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('cost_centers', function (Blueprint $table) {
             $table->id();
-            $table->string('department_id')->unique();
             $table->integer('customer_id')->nullable();
             $table->integer('firm_id')->nullable();
             $table->integer('hospital_id')->nullable();
-            $table->integer('parent_id')->nullable();
-            $table->string('name');
+            $table->string('code')->unique(); // e.g. CC-101
+            $table->string('name');           // e.g. Medical Supplies
             $table->string('slug');
             $table->tinyInteger('status')->default(1)->comment('1=active, 0=inactive');
             $table->timestamps();
@@ -23,6 +22,6 @@ return new class extends Migration {
 
 
     public function down(): void {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('cost_centers');
     }
 };
