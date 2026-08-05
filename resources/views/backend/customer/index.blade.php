@@ -50,52 +50,78 @@
         <div class="card mt-4">
             <div class="card-header border-0 pt-6">
                 <ul class="nav nav-tabs" id="customerTabMenu" role="tablist">
-                    @permission('customer.view')
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="customerTabBtn" data-bs-toggle="tab" data-bs-target="#customerTab" type="button" role="tab">
-                            <i class="bi bi-speedometer2 me-1"></i> {{ __('Customers') }}
-                        </button>
-                    </li>
-                    @endpermission
-                    {{-- New Section: Associated Hospitals --}}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="hospitalTabBtn" data-bs-toggle="tab" data-bs-target="#hospitalTab" type="button" role="tab">
-                            <i class="bi bi-building me-1"></i> {{ __('Hospitals') }}
-                        </button>
-                    </li>
-                    {{-- New Section: Associated Employees --}}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="userTabBtn" data-bs-toggle="tab" data-bs-target="#userTab" type="button" role="tab">
-                            <i class="bi bi-employee me-1"></i> {{ __('Employees') }}
-                        </button>
-                    </li>
-                    {{-- New Section: Plan & Subscription Details --}}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="subscriptionTabBtn" data-bs-toggle="tab" data-bs-target="#subscriptionTab" type="button" role="tab">
-                            <i class="bi bi-card-checklist me-1"></i> {{ __('Subscription') }}
-                        </button>
-                    </li>
-                    {{-- New Section: Billing & Invoices History --}}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="billingTabBtn" data-bs-toggle="tab" data-bs-target="#billingTab" type="button" role="tab">
-                            <i class="bi bi-receipt me-1"></i> {{ __('Billing & Invoices') }}
-                        </button>
-                    </li>
+                    @if(empty(auth()->user()->customer_id))
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="customerTabBtn" data-bs-toggle="tab" data-bs-target="#customerTab" type="button" role="tab">
+                                <i class="bi bi-speedometer2 me-1"></i> {{ __('Customers') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Associated Hospitals --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hospitalTabBtn" data-bs-toggle="tab" data-bs-target="#hospitalTab" type="button" role="tab">
+                                <i class="bi bi-building me-1"></i> {{ __('Hospitals') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Associated Employees --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="userTabBtn" data-bs-toggle="tab" data-bs-target="#userTab" type="button" role="tab">
+                                <i class="bi bi-person me-1"></i> {{ __('Employees') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Plan & Subscription Details --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="subscriptionTabBtn" data-bs-toggle="tab" data-bs-target="#subscriptionTab" type="button" role="tab">
+                                <i class="bi bi-card-checklist me-1"></i> {{ __('Subscription') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Billing & Invoices History --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="billingTabBtn" data-bs-toggle="tab" data-bs-target="#billingTab" type="button" role="tab">
+                                <i class="bi bi-receipt me-1"></i> {{ __('Billing & Invoices') }}
+                            </button>
+                        </li>
+                    @else
+                        {{-- New Section: Associated Hospitals --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hospitalTabBtn" data-bs-toggle="tab" data-bs-target="#hospitalTab" type="button" role="tab">
+                                <i class="bi bi-building me-1"></i> {{ __('Hospitals') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Associated Employees --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="userTabBtn" data-bs-toggle="tab" data-bs-target="#userTab" type="button" role="tab">
+                                <i class="bi bi-users me-1"></i> {{ __('Employees') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Plan & Subscription Details --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="subscriptionTabBtn" data-bs-toggle="tab" data-bs-target="#subscriptionTab" type="button" role="tab">
+                                <i class="bi bi-card-checklist me-1"></i> {{ __('Subscription') }}
+                            </button>
+                        </li>
+                        {{-- New Section: Billing & Invoices History --}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="billingTabBtn" data-bs-toggle="tab" data-bs-target="#billingTab" type="button" role="tab">
+                                <i class="bi bi-receipt me-1"></i> {{ __('Billing & Invoices') }}
+                            </button>
+                        </li>
+                    @endif
+                    
                     @if(authUser()->customer_id != '' || authUser()->customer_id != null)
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" href="{{ asset('backend/documents/customer/customer_ui.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
-                                <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                                <i class="bi bi-book"></i> {{ __('User Guide')}}
                             </a>
                         </li>
                     @else
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" href="{{ asset('backend/documents/customer/customer_ui.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
-                                <i class="fas fa-book-open"></i> {{ __('User Guide')}}
+                                <i class="bi bi-book"></i> {{ __('User Guide')}}
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" id="documentationTabBtn" href="{{ asset('backend/documents/customer/customer_dev.pdf') }}" target="_blank" class="btn btn-danger btn-sm">
-                                <i class="fas fa-book-open"></i> {{ __('Developer Guide')}}
+                                <i class="bi bi-book"></i> {{ __('Developer Guide')}}
                             </a>
                         </li>
                     @endif
@@ -324,7 +350,14 @@
                                             <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
                                         </svg>
                                     </span>
-                                    <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search role" />
+                                    <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search employee" />
+                                </div>
+                            </div>
+                            <div class="card-toolbar">
+                                <div class="card-toolbar">
+                                    <a href="javascript:void(0)" class="btn btn-primary mx-3" id="addEmployee" data-url="{{ route('customer.employee.create') }}">
+                                        {{ __('Add Employee') }}
+                                    </a>
                                 </div>
                             </div>
                         </div>

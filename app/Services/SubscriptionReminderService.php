@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 
 namespace App\Services;
@@ -57,6 +57,7 @@ class SubscriptionReminderService {
             return $allExpiringEmaill;
         }
 
+
         public function updateCustomerService() {
             try {
                 $customers = DB::select("SELECT c.id, c.subscription_end_date,
@@ -77,7 +78,6 @@ class SubscriptionReminderService {
                 foreach($allExpiringEmaill as $customer) {
                     $customerId = $customer['id'];
                     if($customer['days_left'] <= 0) {
-                        dd($customer['id']);
                         DB::transaction(function () use ($customerId) {
                             DB::table('customers')
                                 ->where('id', $customerId)
@@ -85,13 +85,13 @@ class SubscriptionReminderService {
                                     'status' => 0,
                                     'subscription_status' => 2
                                 ]);
-        
+
                             DB::table('users')
                                 ->where('customer_id', $customerId)
                                 ->update([
                                     'status' => 0
                                 ]);
-        
+
                             DB::table('customer_subscriptions')
                                 ->where('customer_id', $customerId)
                                 ->update([
@@ -117,7 +117,6 @@ class SubscriptionReminderService {
 
             }
         }
-
 
 
         public function getExpiringCustomers() {
@@ -161,7 +160,6 @@ class SubscriptionReminderService {
             
         }
     // 
-
 
 
 

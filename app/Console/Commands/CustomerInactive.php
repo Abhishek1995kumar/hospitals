@@ -18,4 +18,6 @@ class CustomerInactive extends Command {
         $customers = $reminderService->updateCustomerService();
         return Command::SUCCESS;
     }
+
+
 }

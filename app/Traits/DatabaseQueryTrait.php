@@ -15,6 +15,42 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 trait DatabaseQueryTrait {
+    // Plan and Feature list queries function start
+        public function planListTrait() {
+            return DB::select("SELECT id, plan_name, price, duration_days, max_hospitals, max_firms, max_users FROM plans WHERE status=1");
+
+        }
+
+        public function featureListTrait() {
+            // Database se records get karein (COALESCE se agar module name NULL ho toh default name aayega)
+            $featuresRaw = DB::select("SELECT 
+                    features.id, 
+                    features.feature_name, 
+                    COALESCE(modules.name, 'Other') AS module_name 
+                FROM features
+                LEFT JOIN modules ON modules.id = features.module_id AND modules.status = 1
+                WHERE features.status = 1
+            ");
+
+            // Laravel Collection ke groupBy method se ise module_name ke hisab se group karein
+            $groupedFeatures = collect($featuresRaw)->groupBy('module_name');
+
+            return $groupedFeatures;
+        }
+
+        public function planFeatureListTrait() {
+            return DB::select("SELECT p.plan_name, p.price, CONCAT(p.duration_days, ' ', 'Days') AS duration_days, p.max_hospitals, p.max_firms, p.max_users, f.feature_name, m.name AS module_name FROM feature_plans fp
+                        LEFT JOIN plans p ON p.id = fp.plan_id
+                        LEFT JOIN features f ON f.id = fp.feature_id
+                        LEFT JOIN modules m ON m.id = f.module_id
+                        WHERE p.status=1
+            ");
+        }
+    // Plan and Feature list queries function end
+
+
+
+
     // customer list queries function start
         public function customerListTrait() {
             try {
@@ -531,6 +567,16 @@ trait DatabaseQueryTrait {
             return DB::select($data, [$customerId]);
         }
 
+        public function getAllModulesListTrait() {
+            return DB::select("SELECT id, name,
+                    CASE 
+                        WHEN status=1 THEN 'Active'
+                        ELSE 'Inactive'
+                    END module_status
+                    FROM modules
+                ");
+        }
+
         public function moduleTrait() {
             return DB::select("SELECT id, name,
                     CASE 
@@ -595,6 +641,44 @@ trait DatabaseQueryTrait {
                             'pharmacy_suppliers.name as supplier_name'
             ) // ->where('pharmacy_medicines.customer_id', authUser()->customer_id)
             ->get();
+            return $data;
+        }
+
+
+        public function clientListTrait() {
+            $data = DB::select("SELECT ps.id AS client_id, ps.company_name, ps.name AS client_name, ps.gst_no AS client_gst_no, 
+                    ps.pan_no AS client_pan_no, ps.credit_limit, ps.doctor_name, 
+                    ps.opening_balance,
+                    CASE 
+                        WHEN c.customer_name IS NOT NULL THEN c.customer_name
+                        ELSE '-'
+                    END customer_name,
+                    CASE 
+                        WHEN h.name IS NOT NULL THEN h.name
+                        ELSE '-'
+                    END hospital_name,
+                    CASE 
+                        WHEN ps.balance_type = 1 THEN 'Credit'
+                        ELSE 'Debit'
+                    END balance_type
+                    FROM pharmacy_suppliers ps
+                    LEFT JOIN hospitals h ON h.id = ps.hospital_id
+                    LEFT JOIN customers c ON c.id = ps.customer_id
+                    WHERE ps.party_type = 1 AND ps.status = 1
+            ");
+            return $data;
+        }
+
+
+        public function customerClientListTrait() {
+            $data = DB::select("SELECT ps.id AS client_id, ps.company_name, ps.name AS client_name, ps.gst_no AS client_gst_no, 
+                    ps.pan_no AS client_pan_no, ps.credit_limit, ps.balance_type, ps.doctor_name, 
+                    ps.opening_balance, c.customer_name, h.name AS hospital_name
+                    FROM pharmacy_suppliers ps
+                    LEFT JOIN hospitals h ON h.id = ps.hospital_id
+                    LEFT JOIN customers c ON c.id = ps.customer_id
+                    WHERE ps.party_type = 1 AND ps.status = 1
+            ");
             return $data;
         }
 

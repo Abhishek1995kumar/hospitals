@@ -776,6 +776,66 @@
 // data list End --
 
 
-// customer page 
 
-// customer page end
+// Country change hone par states load karne ke liye
+    $(document).on('change', '#country_name', function() {
+        let countryId = $(this).val();
+        let stateSelect = $('#state_name');
+        stateSelect.html('<option value="">Loading...</option>'); // State dropdown ko khali karein aur placeholder lagayein
+        if (countryId) {
+            let url = 'admin/customer/state/' + countryId; // Laravel route URL generate karne ke liye string replace ka use karenge
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    stateSelect.html('<option value="">Select State Name</option>');
+                    // Response loop chalakar dropdown fill karein
+                    $.each(data, function(id, name) {
+                        stateSelect.append('<option value="' + id + '">' + name + '</option>');
+                    });
+
+                    if (stateSelect.hasClass("select2-hidden-accessible")) {  // select2 ko refresh karna
+                        stateSelect.trigger('change');
+                    }
+                },
+                error: function() {
+                    stateSelect.html('<option value="">Error loading states</option>');
+                }
+            });
+        } else {
+            stateSelect.html('<option value="">Select State Name</option>');
+        }
+    });
+
+    // state change hone par cities set hoga dropdown me
+    $(document).on('change', '#state_name', function() {
+        let stateId = $(this).val();
+        let citySelect = $('#city_name');
+        citySelect.html('<option value="">Loading...</option>'); // City dropdown ko khali karein aur placeholder lagayein
+        if (stateId) {
+            let url = 'admin/customer/city/' + stateId; // Laravel route URL generate karne ke liye string replace ka use karenge
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    citySelect.html('<option value="">Select City Name</option>');
+                    // Response loop chalakar dropdown fill karein
+                    $.each(data, function(id, name) {
+                        citySelect.append('<option value="' + id + '">' + name + '</option>');
+                    });
+
+                    if (citySelect.hasClass("select2-hidden-accessible")) { // select2 ko refresh karna
+                        citySelect.trigger('change');
+                    }
+                },
+                error: function() {
+                    citySelect.html('<option value="">Error loading cities</option>');
+                }
+            });
+        } else {
+            citySelect.html('<option value="">Select City Name</option>');
+        }
+    });
+// Country change hone par states load karne ke liye

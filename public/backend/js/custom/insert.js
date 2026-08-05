@@ -5,180 +5,6 @@ $.ajaxSetup({
     }
 });
 
-// let addMoreRows=2;
-
-
-// When click on add button than redirect create page without page load Start
-    function loadPage(url, addHistory = true) {
-        $.ajax({
-            url: url,
-            type: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(response){
-                $('#kt_content_container').html(response);
-                $('#loaderContainer').hide(); // Loader hide karein
-                if(addHistory){
-                    history.pushState({url: url}, '', url);
-                } 
-            },
-            error: function() {
-                $('#loaderContainer').hide();
-            }
-        });
-    }
-
-
-    // Global click listeners jo naye dynamically loaded buttons par bhi kaam karein
-    $(document).on('click', '#addCustomer', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-
-    // Global click listeners jye supplier ke liye hai
-    $(document).on('click', '#addPharmacyCustomer', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-    $(document).on('click', '#addSupplier', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-    $(document).on('click', '#addPharmacyVendor', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-    $(document).on('click', '#addMadicine', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-    $(document).on('click', '#addBatchMadicine', function(e){
-        e.preventDefault();
-        let url = $(this).data('url');
-        loadPage(url);
-        
-    });
-    
-
-    window.onpopstate = function(){
-        loadPage(location.pathname, false);
-    };
-
-    $(document).off('click', '#backCustomerList').on('click', '#backCustomerList', function(e){
-        e.preventDefault();
-        loadPage(window.CustomerListUrl);
-    });
-
-
-    $(document).off('click', '#backSupplierList').on('click', '#backSupplierList', function(e){
-        e.preventDefault();
-        loadPage(window.SupplierListUrl);
-    });
-
-
-    $(document).off('click', '#backPharmacyCustomerList').on('click', '#backPharmacyCustomerList', function(e){
-        e.preventDefault();
-        loadPage(window.PharmacyCustomerListUrl);
-    });
-
-
-    $(document).off('click', '#backPharmacyVendorList').on('click', '#backPharmacyVendorList', function(e){
-        e.preventDefault();
-        loadPage(window.PharmacyVendorListUrl);
-    });
-
-    $(document).off('click', '#backPharmacyMadicineList').on('click', '#backPharmacyMadicineList', function(e){
-        e.preventDefault();
-        loadPage(window.PharmacyMadicineListUrl);
-    });
-
-    $(document).off('click', '#backPharmacyBatchMadicineList').on('click', '#backPharmacyBatchMadicineList', function(e){
-        e.preventDefault();
-        loadPage(window.PharmacyMadicineListUrl);
-    });
-// When click on add button than redirect create page without page load End
-
-
-
-// Field Validation Start
-    function validateEmail(email) {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if(email.value.trim() != '' && !regex.test(email.value)) {
-            document.getElementById('emailError').style.display = "block"
-        } else {
-            document.getElementById('emailError').style.display = "none"
-        }
-    }
-
-    function validateGstNumber(gst) {
-        const regex = /^[0-9]{2}[aA-zZ]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[aA-zZ]{1}[0-9A-Z]{1}$/;
-        if(gst.value.trim() != '' && !regex.test(gst.value)) {
-            document.getElementById('gstError').style.display = "block"
-        } else {
-            document.getElementById('gstError').style.display = "none"
-        }
-    }
-
-    function validatePanNumber(pan) {
-        const regex = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}$/;
-        if(pan.value.trim() != '' && !regex.test(pan.value)) {
-            document.getElementById('panError').style.display = "block"
-        } else {
-            document.getElementById('panError').style.display = "none"
-        }
-    }
-
-    function validateDrugLicence(drug) {
-        const dlRegex = /^[A-Z]{2}[-/\s]?[A-Z0-9]{2,5}[-/\s]?(20|20B|20F|20G|21|21B)[-/\s]?[0-9]{4,8}$/i;
-        if(drug.value.trim() != '' && !dlRegex.test(drug.value)) {
-            document.getElementById('drugError').style.display = "block"
-        } else {
-            document.getElementById('drugError').style.display = "none"
-        }
-    }
-
-    function validationNumber(elem) {
-        elem.value = elem.value.replace(/\D/g, '');
-        if (elem.value.length !== 10) {
-            document.getElementById("mobileError").style.display = "block";
-        } else {
-            document.getElementById("mobileError").style.display = "none";
-        }
-    }
-
-    function validationAlternateNumber(elem) {
-        elem.value = elem.value.replace(/\D/g, '');
-        if (elem.value.length !== 10) {
-            document.getElementById("alternateMobileError").style.display = "block";
-        } else {
-            document.getElementById("alternateMobileError").style.display = "none";
-        }
-    }
-
-    function validationWebsite(elem) {
-        const urlPattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+(\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)?$/;
-        if (elem.value.trim() !== "" && !urlPattern.test(elem.value)) {
-            document.getElementById("websiteError").style.display = "block";
-        } else {
-            document.getElementById("websiteError").style.display = "none";
-        }
-    }
-// Field Validation End
-
-
-
-
 // Role and Permission & Role Permission & User Role List Function with CRUD Functionality
     function saveRole(e) {
         e.preventDefault();
@@ -303,8 +129,6 @@ $.ajaxSetup({
             }
         });
     }
-    
-
 
     function savePermission(e) {
         e.preventDefault();
@@ -375,8 +199,7 @@ $.ajaxSetup({
         let parentSelect = $('.parent_permission_module_id');
         let childSelect = $('#child_permission_module_id');
 
-        // 1. Page load hote hi Parent Dropdown fill karein (Click event hata diya)
-        function loadParentModules() {
+        function loadParentModules() { // 1. Page load hote hi Parent Dropdown fill karein (Click event hata diya)
             parentSelect.html('<option value="">Loading...</option>').trigger('change');
             $.ajax({
                 url: '/admin/authentication/module/', // Added leading slash for absolute path
@@ -425,36 +248,6 @@ $.ajaxSetup({
             });
         });
     });
-
-    // $(document).on('change', '#parent_permission_module_id', function() {
-    //     let parentId = $(this).val();
-    //     let childModuleSelect = $('#child_permission_module_id');
-    //     childModuleSelect.html('<option value="">Loading...</option>');
-    //     if (parentId) {
-    //         let url = 'admin/authentication/child/' + parentId;
-    //         $.ajax({
-    //             url: url,
-    //             type: 'GET',
-    //             dataType: 'json',
-    //             success: function(data) {
-    //                 childModuleSelect.html('<option value="">Select Child Module Name</option>');
-    //                 // Response loop chalakar dropdown fill karein
-    //                 $.each(data, function(id, name) {
-    //                     childModuleSelect.append('<option value="' + id + '">' + name + '</option>');
-    //                 });
-
-    //                 if (childModuleSelect.hasClass("select2-hidden-accessible")) {
-    //                     childModuleSelect.trigger('change');
-    //                 }
-    //             },
-    //             error: function() {
-    //                 childModuleSelect.html('<option value="">Error loading child module</option>');
-    //             }
-    //         });
-    //     } else {
-    //         childModuleSelect.html('<option value="">Select Child Module Name</option>');
-    //     }
-    // });
 
     function editPermission(button) {
         let permissionId = button.getAttribute('data-id');
@@ -629,8 +422,11 @@ $.ajaxSetup({
 // Role permission mapping js end --
 
 
+
+
+
 // Plan, Feature and Plan Feature Mapping Start
-    function savePlan(e) { 
+    function savePlan(e) {
         e.preventDefault(); 
         $('.planBtn').prop('disabled', true); 
         const intPattern = /^\d+$/;
@@ -677,25 +473,16 @@ $.ajaxSetup({
             }
         }
 
-        // 4. Submit Plan (Agar saari validation pass ho jayein)
-        submitPlan(data.plan_name, data.price, data.duration_days, data.max_hospitals, data.max_firms, data.max_users);
+        submitPlan(data);
     }
 
-
-    function submitPlan(plan_name, price, duration_days, max_hospitals, max_firms, max_users) {
+    function submitPlan(data) {
         let url = 'admin/plans/save';
+        data._token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: url,
             method: "POST",
-            data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                plan_name: plan_name,
-                price: price,
-                duration_days: duration_days,
-                max_hospitals: max_hospitals,
-                max_firms: max_firms,
-                max_users: max_users
-            },
+            data: data,
             success: function(res) {
                 if(res.success) {
                     $('.planBtn').prop('disabled', false);
@@ -707,7 +494,26 @@ $.ajaxSetup({
                     $("#max_firms").val(''), 
                     $("#max_users").val(''), 
                     validationAlert('Plan created', res.message, 'success', 2000, 'OK');
-                    loadData("plan", '/admin/plans/list/');
+                    loadDatabaseRecord(
+                        '/admin/plans/list/?type=plan',
+                        'plan',
+                        [
+                            { data:'no' },
+                            { data:'plan_name' },
+                            { data:'price' },
+                            { data:'duration_days' },
+                            { data:'max_hospitals' },
+                            { data:'max_firms' },
+                            { data:'max_users' },
+                            { data:'action' }
+                        ],
+                        '#planTable',
+                        editRecord,
+                        deleteRecord,
+                        showRecord,
+                        '#editPlanModal',
+                        '#showPlanModal'
+                    );
                 }
             },
             error: function(xhr) {
@@ -725,20 +531,20 @@ $.ajaxSetup({
     }
 
 
-    function saveFeature(e) { 
+    function saveFeature(e) {
         e.preventDefault(); 
-        $('.featureBtn').prop('disabled', true); 
-        let description = $("#description").val().trim(); 
+        $('.featureBtn').prop('disabled', true);
         let data = { 
             'feature_name' : $("#feature_name").val().trim(), 
             'module_name'  : $("#module_name").val().trim(), 
+            'description'  : $("#description").val().trim()
         }; 
 
         const validationRules = [ 
             { key: 'feature_name', type: 'required', label: 'feature name', msg: 'Please enter a feature name.' }, 
             { key: 'feature_name', type: 'string',   label: 'feature name', msg: 'Feature name must contain characters only.' }, 
             { key: 'module_name',  type: 'required', label: 'module name',  msg: 'Please enter a module name.' }, 
-            { key: 'module_name',  type: 'string',   label: 'module name',  msg: 'Module name must contain characters only.' }, 
+            { key: 'module_name',  type: 'integer',   label: 'module name',  msg: 'Module name must be a number.' }, 
         ]; 
 
         const strPattern = /^[a-zA-Z\s]+$/;
@@ -756,21 +562,23 @@ $.ajaxSetup({
                 $('.featureBtn').prop('disabled', false); 
                 return false; 
             } 
+
+            if (rule.type === 'integer' && value !== '' && !Number.isInteger(Number(value))) { 
+                validationAlert(`Invalid ${rule.label}`, rule.msg, 'error', 5000, 'OK'); 
+                $('.featureBtn').prop('disabled', false); 
+                return false; 
+            } 
         } 
-        submitPlan(data.feature_name, data.module_name, description); 
+        submitFeature(data); 
     }
 
-    function submitPlan(feature_name, module_name, description) {
+    function submitFeature(data) {
         let url = 'admin/plans/feature/save';
+        data._token = $('meta[name="csrf-token"]').attr('content');
         $.ajax({
             url: url,
             method: "POST",
-            data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                feature_name: feature_name,
-                module_name: module_name,
-                description: description
-            },
+            data: data,
             success: function(res) {
                 if(res.success) {
                     $('.featureBtn').prop('disabled', false);
@@ -779,7 +587,22 @@ $.ajaxSetup({
                     $("#module_name").val('');
                     $("#description").val('');
                     validationAlert('Feature created', res.message, 'success', 2000, 'OK');
-                    loadData("feature", '/admin/plans/list/');
+                    loadDatabaseRecord(
+                        '/admin/plans/list/?type=feature',
+                        'feature',
+                        [
+                            { data:'no' },
+                            { data:'module_name' },
+                            { data:'feature_name' },
+                            { data:'action' }
+                        ],
+                        '#featureTable',
+                        editRecord,
+                        deleteRecord,
+                        showRecord,
+                        '#editFeatureModal',
+                        '#showFeatureModal'
+                    );
                 }
             },
             error: function(xhr) {
@@ -797,12 +620,11 @@ $.ajaxSetup({
     }
     
 
-    function savePlanFeatureMapping(event) {
-        event.preventDefault();
+    function savePlanFeatureMapping(e) {
+        e.preventDefault();
         let featureIds = [];
         let planId = document.getElementById('plan_id').value;
         $('#createPlanFeatureMappingBtn').prop('disabled', true);
-
         document.querySelectorAll('input[name="feature_id[]"]:checked').forEach(function(checkbox) {
             featureIds.push(checkbox.value);
         });
@@ -812,7 +634,6 @@ $.ajaxSetup({
             $('#createPlanFeatureMappingBtn').prop('disabled', false);
             return false;
         }
-
         if(featureIds.length === 0) {
             validationAlert('Missing feature', 'Please select at least one feature.', 'error', 2000, 'OK');
             $('#createPlanFeatureMappingBtn').prop('disabled', false);
@@ -836,13 +657,31 @@ $.ajaxSetup({
             success: function(res) {
                 if(res.success == true && res.code == 200) {
                     $('#createPlanFeatureMappingBtn').prop('disabled', false);
+                    $('#addPlanFeatureMapping').modal('hide');
                     $('#plan_id').val('');
                     document.querySelectorAll('input[name="permission_id[]"]').forEach(function(checkbox) {
                         checkbox.checked = false;
                     });
                     validationAlert('Feature plan created', res.message, 'success', 5000, 'OK');
-                    $('#addPlanFeatureMapping').modal('hide');
-                    loadData("planFeature", '/admin/plans/list/');
+                    loadDatabaseRecord(
+                        '/admin/plans/list/?type=planFeature',
+                        'planFeature',
+                        [
+                            { data:'no' },
+                            { data:'plan_name' },
+                            { data:'feature_name' },
+                            { data:'module_name' },
+                            { data:'price' },
+                            { data:'duration_days' },
+                            { data:'action' }
+                        ],
+                        '#planFeatureTable',
+                        editRecord,
+                        deleteRecord,
+                        showRecord,
+                        '#editPlanFeatureModal',
+                        '#showPlanFeatureModal'
+                    );
                 }
             },
             error: function(xhr) {
@@ -860,6 +699,9 @@ $.ajaxSetup({
         });
     }
 // Plan, Feature and Plan Feature Mapping End
+
+
+
 
 
 // Module JS Start --
@@ -972,70 +814,6 @@ $.ajaxSetup({
 
 
 // Customer Creation Start
-    // Country change hone par states load karne ke liye
-        $(document).on('change', '#country_name', function() {
-            let countryId = $(this).val();
-            let stateSelect = $('#state_name');
-            stateSelect.html('<option value="">Loading...</option>'); // State dropdown ko khali karein aur placeholder lagayein
-            if (countryId) {
-                let url = 'admin/customer/state/' + countryId; // Laravel route URL generate karne ke liye string replace ka use karenge
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        stateSelect.html('<option value="">Select State Name</option>');
-                        // Response loop chalakar dropdown fill karein
-                        $.each(data, function(id, name) {
-                            stateSelect.append('<option value="' + id + '">' + name + '</option>');
-                        });
-
-                        if (stateSelect.hasClass("select2-hidden-accessible")) {  // select2 ko refresh karna
-                            stateSelect.trigger('change');
-                        }
-                    },
-                    error: function() {
-                        stateSelect.html('<option value="">Error loading states</option>');
-                    }
-                });
-            } else {
-                stateSelect.html('<option value="">Select State Name</option>');
-            }
-        });
-
-        // state change hone par cities set hoga dropdown me
-        $(document).on('change', '#state_name', function() {
-            let stateId = $(this).val();
-            let citySelect = $('#city_name');
-            citySelect.html('<option value="">Loading...</option>'); // City dropdown ko khali karein aur placeholder lagayein
-            if (stateId) {
-                let url = 'admin/customer/city/' + stateId; // Laravel route URL generate karne ke liye string replace ka use karenge
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        citySelect.html('<option value="">Select City Name</option>');
-                        // Response loop chalakar dropdown fill karein
-                        $.each(data, function(id, name) {
-                            citySelect.append('<option value="' + id + '">' + name + '</option>');
-                        });
-
-                        if (citySelect.hasClass("select2-hidden-accessible")) { // select2 ko refresh karna
-                            citySelect.trigger('change');
-                        }
-                    },
-                    error: function() {
-                        citySelect.html('<option value="">Error loading cities</option>');
-                    }
-                });
-            } else {
-                citySelect.html('<option value="">Select City Name</option>');
-            }
-        });
-    // Country change hone par states load karne ke liye
-
-
     function saveCustomer(e) { 
         e.preventDefault(); 
         $('.saveCustomerBtn').prop('disabled', true); 

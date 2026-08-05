@@ -8,27 +8,25 @@ use App\Models\Backend\Feature;
 use App\Models\Backend\FeaturePlan;
 
 use App\Traits\ValidationTrait;
+use App\Traits\DatabaseQueryTrait;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
 use App\Http\Controllers\Controller;
 
 class FeaturePlanController extends Controller {
-    use ValidationTrait;
+    use ValidationTrait, DatabaseQueryTrait;
+
     public function index() {
-        $plans = DB::table('plans')
-                ->select('id', 'plan_name')
-                ->where('status', 1)
-                ->get();
-
-        $query2 = DB::table('features')
-                ->select('id', 'module_name', 'feature_name')
-                ->where('status', 1)
-                ->get();
-        $features = $query2->groupBy('module_name');
-
+        $plans = $this->planListTrait();
+        $features = $this->featureListTrait();
+        // dd($features);
+        $modules = $this->getAllModulesListTrait();
         return view('backend.settings.plans.index', [
             'plans' => $plans,
-            'features' => $features
+            'features' => $features,
+            'modules' => $modules
         ]);
     }
 
@@ -38,46 +36,29 @@ class FeaturePlanController extends Controller {
             if (!$request->filled('type')) {
                 return json_response(false, 400, 'List type is required');
             }
-
-            // $loggedInRole = DB::table('users')
-            //                     ->whereNull('users.customer_id')
-            //                     ->join('user_roles', 'user_roles.user_id', '=', 'users.id')
-            //                     ->join('roles', 'roles.id', '=', 'user_roles.role_id')
-            //                     ->select('users.id', 'roles.code')
-            //                     ->whereIn('users.user_type', [1,2])
-            //                     ->where('users.id', auth()->user()->id)
-            //                     ->where('users.status', 1)->get();
+            // $loggedInRole = $this->loggedInRolesTrait();
             
             switch ($request->type) {
                 case 'plan':
                     // if($loggedInRole[0]->is_system == 0 && $loggedInRole[0]->scope == 0) {
-                        $plans = DB::table('plans')
-                            ->select('id', 'plan_name', 'price', 'duration_days', 'max_hospitals', 'max_firms', 'max_users')
-                            ->where('status', 1)->get();
-                        $data['data'] = $plans;
+                        $plans = $this->planListTrait();
+                        $data = $plans;
                     // }
                     $message = 'Plan fetched successfully';
                     break;
 
                 case 'feature':
                     // if($user->customer_id == NULL || $user->customer_id == '') {
-                        $features = DB::table('features')
-                            ->select('id', 'feature_name', 'module_name')
-                            ->where('status', 1)->get();
-
-                        $data['data'] = $features;
+                        $features = $this->featureListTrait();
+                        $data = $features;
                     // }
                     $message = 'Feature fetched successfully';
                     break;
 
                 case 'planFeature':
                     // if($user->customer_id == NULL || $user->customer_id == '') {
-                        $featurePlans = DB::table('feature_plans')
-                                    ->leftJoin('plans', 'plans.id', '=', 'feature_plans.plan_id')
-                                    ->leftJoin('features', 'features.id', '=', 'feature_plans.feature_id')
-                                    ->select('feature_plans.id', 'plans.plan_name', 'plans.price', 'features.feature_name', 'features.module_name')
-                                    ->get();
-                        $data['data'] = $featurePlans;
+                        $featurePlans = $this->planFeatureListTrait();
+                        $data = $featurePlans;
                     // } 
                     $message = 'Feature plan fetched successfully';
                     break;
@@ -113,8 +94,7 @@ class FeaturePlanController extends Controller {
             $plan->status         = 1;
             $plan->updated_at     = NULL;
             $plan->save();
-            storeLog("Permission Create");
-
+            storeLog("Plan Create");
             return json_response(true, 200, 'Plan created successfully.');
 
         } catch (Throwable $th) {
@@ -130,17 +110,17 @@ class FeaturePlanController extends Controller {
             if ($validation) {
                 return json_response(false, 410, "Validation failed", $validation);
             }
-
+            
             $feature               = new Feature();
             $feature->feature_name = trim(ucwords($data['feature_name']));
             $feature->feature_slug = trim(str_replace(' ', '_', strtolower($data['feature_name'])));
-            $feature->module_name  = trim(ucwords($data['module_name']));
-            $feature->description  = $data['description'];
+            $feature->module_id    = (int) $data['module_name'];
+            $feature->description  = trim(ucwords($data['description']));
             $feature->status       = 1;
             $feature->updated_at   = NULL;
             $feature->save();
-            storeLog("Permission Create");
-            return json_response(true, 200, 'Plan created successfully.');
+            storeLog("Feature Create");
+            return json_response(true, 200, 'Feature created successfully.');
 
         } catch (Throwable $th) {
             Log::error($th);
@@ -156,12 +136,13 @@ class FeaturePlanController extends Controller {
             if($validation) {
                 return json_response(false, 410, "Validation failed", $validation);
             }
-
+            
             DB::transaction(function () use ($data) {
                 foreach($data['feature_id'] as $feature) {
                     FeaturePlan::create([
                         'plan_id'    => (int) $data['plan_id'],
                         'feature_id' => (int) $feature,
+                        'created_at' => now(),
                         'updated_at' => NULL,
                     ]);
                 }

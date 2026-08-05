@@ -78,7 +78,7 @@
                                         <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search role" />
+                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search plan" />
                             </div>
                         </div>
                         <div class="card-toolbar">
@@ -118,7 +118,7 @@
                                         <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search permission" />
+                                <input type="text" id="searchInput" class="form-control w-250px ps-15" placeholder="Search feature" />
                             </div>
                         </div>
                         <div class="card-toolbar">
@@ -154,7 +154,7 @@
                                         <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" data-kt-table-filter="search" class="form-control w-250px ps-15" placeholder="Search role permission" />
+                                <input type="text" data-kt-table-filter="search" class="form-control w-250px ps-15" placeholder="Search plan feature" />
                             </div>
                         </div>
                         <div class="card-toolbar">
@@ -164,12 +164,15 @@
                         </div>
                     </div>
                     <div class="card-body table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="featurePlanTable">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="planFeatureTable">
                             <thead>
                                 <tr class="text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                     <th class="text-center min-w-125px">{{ __('Id')}}</th>
                                     <th class="text-center min-w-125px">{{ __('Plan')}}</th>
+                                    <th class="text-center min-w-125px">{{ __('Module')}}</th>
                                     <th class="text-center min-w-125px">{{ __('Feature')}}</th>
+                                    <th class="text-center min-w-125px">{{ __('Amount')}}</th>
+                                    <th class="text-center min-w-125px">{{ __('Duration')}}</th>
                                     <th class="text-center min-w-125px">{{ __('Action')}}</th>
                                 </tr>
                             </thead>
@@ -290,16 +293,25 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="row">
+                                                <div class="col-md-6 mb-4 " id="module_nameDiv">
+                                                    <div class="form-group">
+                                                        <label class="required fs-6 fw-semibold mb-2">{{ __('Module Name')}}</label>
+                                                        <select name="module_id" id="module_name" data-control="select2" class="form-select search" data-placeholder="Select module">
+                                                            <option selected disabled> {{ __('Select Module')}} </option>
+                                                            @if(!empty($modules))
+                                                                @foreach($modules as $module)
+                                                                    <option value="{{ $module->id }}"> {{ $module->name }} </option>
+                                                                @endforeach
+                                                            @else 
+                                                                <option value="">{{ __('Data not available')}}</option>
+                                                            @endif
+                                                        </select>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6 mb-4 " id="feature_nameDiv">
                                                     <div class="form-group">
                                                         <label class="required fs-6 fw-semibold mb-2">{{ __('Feature Name')}}</label>
                                                         <input name="feature_name" id="feature_name" class="form-control" placeholder="Enter feature name" >
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mb-4 " id="module_nameDiv">
-                                                    <div class="form-group">
-                                                        <label class="required fs-6 fw-semibold mb-2">{{ __('Module Name')}}</label>
-                                                        <input name="module_name" id="module_name" type="text" class="form-control" placeholder="Enter module name" >
                                                     </div>
                                                 </div>
                                             </div>
@@ -314,7 +326,7 @@
                                             </div>
                                         </div>
                                         <div class="card-footer modal-footer">
-                                            <button type="submit" class="btn btn-primary featureBtn" id="featureBtnId" onclick="saveFeature(event)">{{ __('Create Feature')}}</button>
+                                            <button type="submit" class="btn btn-primary featureBtn" onclick="saveFeature(event)">{{ __('Create Feature')}}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -356,7 +368,7 @@
                                                         <label class="required fs-6 fw-semibold mb-2">{{ __('Plans')}}</label>
                                                         <select name="plan_id" class="form-select search" id="plan_id" data-control="select2" data-placeholder="Select plans">
                                                             <option selected disabled> {{ __('Select Plan')}} </option>
-                                                            @if(isset($plans) && $plans->isNotEmpty())
+                                                            @if(!empty($plans))
                                                                 @foreach($plans as $plan)
                                                                     <option value="{{ $plan->id }}"> {{ $plan->plan_name }} </option>
                                                                 @endforeach
@@ -372,7 +384,7 @@
                                                 <div class="col-md-12 mb-4 mt-3" id="ngoCenterDiv">
                                                     <label class="required fs-6 fw-semibold mb-2">{{ __('Select Feature')}}</label>
                                                     <div class="form-group">
-                                                        @if(isset($features) && $features->isNotEmpty())
+                                                        @if(count($features) > 0)
                                                             <table class="table table-bordered">
                                                                 <thead>
                                                                     <tr>
@@ -429,18 +441,32 @@
 <script src="{{ asset('backend/js/custom/insert.js') }}"></script>
 <script>
     $(document).ready(function() {
-        let url = 'admin/plans/list';
-        loadData('plan', url);
-        $('#planTabBtn').on('show.bs.tab', function (e) {
-            loadData('plan', url);
-        });
-        $('#featureTabBtn').on('show.bs.tab', function (e) {
-            loadData('feature', url);
-        });
-        $('#planFeatureTabBtn').on('show.bs.tab', function (e) {
-            loadData('planFeature', url);
-        });
+        loadDatabaseRecord(
+            '/admin/plans/list/?type=plan',
+            'plan',
+            [
+                { data:'no' },
+                { data:'plan_name' },
+                { data:'price' },
+                { data:'duration_days' },
+                { data:'max_hospitals' },
+                { data:'max_firms' },
+                { data:'max_users' },
+                { data:'action' }
+            ],
+            '#planTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editPlanModal',
+            '#showPlanModal'
+        );
 
+        $('#addFeature').on('shown.bs.modal', function () {
+            $(this).find('.search').select2({
+                dropdownParent: $(this)
+            });
+        });
         
 
         $('#addPlanFeatureMapping').on('shown.bs.modal', function () {
@@ -448,7 +474,70 @@
                 dropdownParent: $(this)
             });
         });
+    });
 
+    $("#planTabBtn").click(function() {
+        loadDatabaseRecord(
+            '/admin/plans/list/?type=plan',
+            'plan',
+            [
+                { data:'no' },
+                { data:'plan_name' },
+                { data:'price' },
+                { data:'duration_days' },
+                { data:'max_hospitals' },
+                { data:'max_firms' },
+                { data:'max_users' },
+                { data:'action' }
+            ],
+            '#planTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editPlanModal',
+            '#showPlanModal'
+        );
+    });
+
+    $("#featureTabBtn").click(function() {
+        loadDatabaseRecord(
+            '/admin/plans/list/?type=feature',
+            'feature',
+            [
+                { data:'no' },
+                { data:'module_name' },
+                { data:'feature_name' },
+                { data:'action' }
+            ],
+            '#featureTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editFeatureModal',
+            '#showFeatureModal'
+        );
+    });
+
+    $("#planFeatureTabBtn").click(function() {
+        loadDatabaseRecord(
+            '/admin/plans/list/?type=planFeature',
+            'planFeature',
+            [
+                { data:'no' },
+                { data:'plan_name' },
+                { data:'module_name' },
+                { data:'feature_name' },
+                { data:'price' },
+                { data:'duration_days' },
+                { data:'action' }
+            ],
+            '#planFeatureTable',
+            editRecord,
+            deleteRecord,
+            showRecord,
+            '#editPlanFeatureModal',
+            '#showPlanFeatureModal'
+        );
     });
 </script>
 @endsection

@@ -149,7 +149,56 @@ trait ValidationTrait {
     }
 
     // Department Validation Trait
-        public function departmentValidationTrait($data) {
+        public function parentValidationDepartmentTrait($data) {
+            try {
+                $errors = [];
+                $code  = trim(preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($data['name'])));
+                $exists = DB::table('departments')->where('slug', $code)->whereNull('parent_id')->exists();
+                if(!empty($exists)) {
+                    return $errors['name'][] = 'Already department exists, please enter anyother department name.';
+                }
+
+                $rules = [
+                    'name' => ['required', 'string', 'min:3', 'max:255'],
+                ];
+                $messages = [
+                    'name.required' => 'The:name field is required.',
+                    'name.string' => 'The:name must be a string.',
+                    'name.max' => 'The:name may not be greater than 255 characters.',
+                    'name.min' => 'The:name may not be less than 3 characters.',
+                ];
+                
+                foreach ($rules as $field => $fieldRules) {
+                    $value = $data[$field] ?? null;
+                    foreach ($fieldRules as $rule) {
+                        if ($rule === 'required' && empty($value)) {
+                            $errors[$field][] = $messages["{$field}.required"];
+
+                        } elseif ($rule === 'string' && !is_string($value)) {
+                            $errors[$field][] = $messages["{$field}.string"];
+
+                        } elseif (Str::startsWith($rule, 'max:')) {
+                            $max = (int)Str::after($rule, 'max:');
+                            if (strlen($value) > $max) {
+                                $errors[$field][] = $messages["{$field}.max"];
+                            }
+                        } elseif (Str::startsWith($rule, 'min:')) {
+                            $min = (int)Str::after($rule, 'min:');
+                            if (strlen($value) < $min) {
+                                $errors[$field][] = $messages["{$field}.min"];
+                            }
+                        }
+                    }
+                }
+                return $errors;
+
+            } catch(Throwable $th) {
+                Log::error(['message' => $th->getMessage()]);
+                return json_response(false, 422, $th->getMessage());
+            }
+        }
+
+        public function childValidationDepartmentTrait($data) {
             try {
                 $department = Department::where('name', $data['name'])->first();
                 if(!empty($department)) {
@@ -766,15 +815,14 @@ trait ValidationTrait {
         public function validationFeatureTait($data) {
             try {
                 $errors = [];
-                $featureName   = trim(preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($data['feature_name'])));
-                $exists     = Feature::where('feature_slug', $featureName)->where('status', 1)->exists();
+                $featureName = trim(preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($data['feature_name'])));
+                $exists      = Feature::where('feature_slug', $featureName)->where('status', 1)->exists();
                 if(!empty($exists)) {
                     return $errors['feature_name'][] = 'This feature is already exists, please enter anyother feature name.';
                 }
-
                 $rules = [
                     'feature_name' => ['required', 'string', 'min:3', 'max:100'],
-                    'module_name' => ['required', 'string', 'min:3', 'max:100'],
+                    'module_name' => ['required', 'string'],
                     'description' => ['string'],
                 ];
 
@@ -783,10 +831,8 @@ trait ValidationTrait {
                     'feature_name.string' => 'The:feature_name must be a string.',
                     'feature_name.max' => 'The:feature_name may not be greater than 255 characters.',
                     'feature_name.min' => 'The:feature_name may not be less than 3 characters.',
-                    'module_name.required' => 'The:module_name field is required.',
-                    'module_name.string' => 'The:module_name must be a string.',
-                    'module_name.max' => 'The:module_name may not be greater than 255 characters.',
-                    'module_name.min' => 'The:module_name may not be less than 3 characters.',
+                    'module_name.required' => 'Module name field is required.',
+                    'module_name.string' => 'Module name must be a string.',
                     'description.string' => 'The:description must be a string.'
                 ];
 
@@ -801,6 +847,9 @@ trait ValidationTrait {
                             $errors[$field][] = $messages["{$field}.string"];
 
                         } 
+                        if($rule === 'integer' && !is_int($value)) {
+                            $errors[$field][] = $messages["{$field}.integer"];
+                        }
                         if (Str::startsWith($rule, 'max:')) {
                             $max = (int)Str::after($rule, 'max:');
                             if (strlen($value) > $max) {
